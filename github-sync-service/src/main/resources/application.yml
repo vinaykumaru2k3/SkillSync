@@ -1,0 +1,41 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: github-sync-service
+  data:
+    mongodb:
+      uri: mongodb://skillsync:skillsync123@localhost:27017/skillsync?authSource=admin
+
+github:
+  api:
+    base-url: https://api.github.com
+    rate-limit:
+      requests-per-hour: 5000
+      retry-delay: 1000
+
+jwt:
+  secret: ${JWT_SECRET:mySecretKeyForSkillSyncPlatformThatIsLongEnough}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.skillsync.github: DEBUG
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  data:
+    mongodb:
+      uri: mongodb://skillsync:skillsync123@mongodb:27017/skillsync?authSource=admin
