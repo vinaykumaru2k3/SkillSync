@@ -59,8 +59,8 @@ class ApiClient {
         return response
       },
       async (error: AxiosError) => {
-        // Log error in development
-        if (process.env.NODE_ENV === 'development') {
+        // Log error in development (but not 404s as they're often expected)
+        if (process.env.NODE_ENV === 'development' && error.response?.status !== 404) {
           console.error('[API Response Error]', {
             status: error.response?.status,
             url: error.config?.url,

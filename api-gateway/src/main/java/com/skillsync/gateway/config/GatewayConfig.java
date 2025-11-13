@@ -22,14 +22,13 @@ public class GatewayConfig {
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder,
                                          @Qualifier("userKeyResolver") KeyResolver keyResolver,
-                                         RedisRateLimiter redisRateLimiter,
+                                         @Qualifier("redisRateLimiter") RedisRateLimiter redisRateLimiter,
                                          @Qualifier("strictRedisRateLimiter") RedisRateLimiter strictRateLimiter) {
         return builder.routes()
                 // Auth Service Routes (stricter rate limiting)
                 .route("auth-service", r -> r
                         .path("/api/v1/auth/**")
                         .filters(f -> f
-                                .stripPrefix(2)
                                 .filter(new SecurityHeadersFilter())
                                 .requestRateLimiter(config -> config
                                         .setRateLimiter(strictRateLimiter)
@@ -38,14 +37,13 @@ public class GatewayConfig {
                                         .setName("auth-service")
                                         .setFallbackUri("forward:/fallback/auth-service"))
                         )
-                        .uri("${gateway.services.auth-service.url:http://localhost:8081}")
+                        .uri("http://localhost:8081")
                 )
                 
                 // User Service Routes
                 .route("user-service", r -> r
                         .path("/api/v1/users/**")
                         .filters(f -> f
-                                .stripPrefix(2)
                                 .filter(new SecurityHeadersFilter())
                                 .requestRateLimiter(config -> config
                                         .setRateLimiter(redisRateLimiter)
@@ -54,7 +52,7 @@ public class GatewayConfig {
                                         .setName("user-service")
                                         .setFallbackUri("forward:/fallback/user-service"))
                         )
-                        .uri("${gateway.services.user-service.url:http://localhost:8082}")
+                        .uri("http://localhost:8082")
                 )
                 
                 // Project Service Routes
@@ -70,7 +68,7 @@ public class GatewayConfig {
                                         .setName("project-service")
                                         .setFallbackUri("forward:/fallback/project-service"))
                         )
-                        .uri("${gateway.services.project-service.url:http://localhost:8083}")
+                        .uri("http://localhost:8083")
                 )
                 
                 // GitHub Sync Service Routes
@@ -86,7 +84,7 @@ public class GatewayConfig {
                                         .setName("github-service")
                                         .setFallbackUri("forward:/fallback/github-service"))
                         )
-                        .uri("${gateway.services.github-service.url:http://localhost:8084}")
+                        .uri("http://localhost:8084")
                 )
                 
                 // Collaboration Service Routes
@@ -102,7 +100,7 @@ public class GatewayConfig {
                                         .setName("collaboration-service")
                                         .setFallbackUri("forward:/fallback/collaboration-service"))
                         )
-                        .uri("${gateway.services.collaboration-service.url:http://localhost:8085}")
+                        .uri("http://localhost:8085")
                 )
                 
                 // Feedback Service Routes
@@ -118,7 +116,7 @@ public class GatewayConfig {
                                         .setName("feedback-service")
                                         .setFallbackUri("forward:/fallback/feedback-service"))
                         )
-                        .uri("${gateway.services.feedback-service.url:http://localhost:8086}")
+                        .uri("http://localhost:8086")
                 )
                 
                 // Notification Service Routes
@@ -134,7 +132,7 @@ public class GatewayConfig {
                                         .setName("notification-service")
                                         .setFallbackUri("forward:/fallback/notification-service"))
                         )
-                        .uri("${gateway.services.notification-service.url:http://localhost:8087}")
+                        .uri("http://localhost:8087")
                 )
                 
                 // WebSocket Routes for Notifications (no rate limiting for WebSocket)
@@ -145,7 +143,7 @@ public class GatewayConfig {
                                         .setName("notification-service")
                                         .setFallbackUri("forward:/fallback/notification-service"))
                         )
-                        .uri("${gateway.services.notification-service.url:http://localhost:8087}")
+                        .uri("http://localhost:8087")
                 )
                 
                 .build();

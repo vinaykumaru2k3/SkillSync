@@ -34,6 +34,7 @@ public class RateLimitConfig {
     }
 
     @Bean
+    @Primary
     public RedisRateLimiter redisRateLimiter() {
         // Allow 100 requests per minute per user/IP
         return new RedisRateLimiter(100, 200, 1);

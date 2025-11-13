@@ -96,34 +96,49 @@
     - Test protected route functionality (frontend)
     - _Requirements: 1.1, 1.2, 1.3_
 
-- [ ] 5. User Service - Backend & Frontend
-  - [ ] 5.1 Backend: Create user profile entities and data models
+- [x] 5. User Service - Backend & Frontend
+
+
+
+
+  - [x] 5.1 Backend: Create user profile entities and data models
+
+
     - Implement UserProfile entity with skill cards
     - Create SkillCard entity with proficiency levels
     - Add profile image metadata handling
     - _Requirements: 2.1, 2.2, 2.4_
   
-  - [ ] 5.2 Backend: Implement profile management APIs
+  - [x] 5.2 Backend: Implement profile management APIs
+
+
     - Create REST controllers for profile CRUD operations
     - Add profile visibility controls (public/private)
     - Implement skill card management endpoints
     - Add file upload endpoints for profile images
     - _Requirements: 2.1, 2.2, 2.3, 2.5_
   
-  - [ ] 5.3 Backend: Add user search and discovery functionality
+
+
+  - [x] 5.3 Backend: Add user search and discovery functionality
+
     - Implement skill-based search with JPA Criteria API
     - Add fuzzy matching for search queries
     - Create search result ranking algorithm
     - _Requirements: 8.1, 8.3, 8.5_
   
-  - [ ] 5.4 Frontend: Build user profile management interface
+  - [x] 5.4 Frontend: Build user profile management interface
+
+
     - Create user profile display and editing components
     - Implement skill card management with add/edit/delete functionality
     - Add profile image upload with preview
     - Create profile visibility controls (public/private)
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
   
-  - [ ] 5.5 Frontend: Add user search and discovery interface
+
+  - [x] 5.5 Frontend: Add user search and discovery interface
+
     - Create advanced search interface with skill filters
     - Implement user profile cards with skill highlights
     - Create search result pagination and sorting
