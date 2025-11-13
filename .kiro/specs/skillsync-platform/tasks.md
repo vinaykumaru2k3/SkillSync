@@ -57,19 +57,29 @@
 
 ## Phase 2: Authentication & User Management
 
-- [ ] 4. Auth Service - Backend & Frontend
-  - [ ] 4.1 Backend: Create user authentication entities and repositories
+- [x] 4. Auth Service - Backend & Frontend
+
+
+
+
+  - [x] 4.1 Backend: Create user authentication entities and repositories
+
+
     - Implement User entity with JPA annotations
     - Create UserRepository with Spring Data JPA
     - Add password encoding with BCrypt
     - Implement JWT utility class for token generation and validation
     - _Requirements: 1.1, 1.2_
   
+
+
   - [ ] 4.2 Backend: Implement authentication APIs
     - Create REST controllers for login, register, and logout
     - Implement JWT token refresh mechanism
     - Add token blacklisting for logout functionality
     - Integrate GitHub OAuth for social login
+
+
     - _Requirements: 1.1, 1.2, 1.3_
   
   - [ ] 4.3 Frontend: Implement authentication and routing

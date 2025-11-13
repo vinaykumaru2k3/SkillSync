@@ -86,11 +86,28 @@ class ApiClient {
     return localStorage.getItem('auth_token')
   }
 
-  private handleUnauthorized() {
+  private async handleUnauthorized() {
     if (typeof window === 'undefined') return
 
-    // Clear auth token
+    // Try to refresh token
+    const refreshToken = localStorage.getItem('refresh_token')
+    if (refreshToken) {
+      try {
+        const response = await this.client.post('/auth/token/refresh', { refreshToken })
+        if (response.data.accessToken) {
+          this.setAuthToken(response.data.accessToken)
+          localStorage.setItem('refresh_token', response.data.refreshToken)
+          return
+        }
+      } catch (error) {
+        console.error('Token refresh failed:', error)
+      }
+    }
+
+    // Clear auth data
     localStorage.removeItem('auth_token')
+    localStorage.removeItem('refresh_token')
+    localStorage.removeItem('user')
 
     // Redirect to login page
     window.location.href = '/login'
