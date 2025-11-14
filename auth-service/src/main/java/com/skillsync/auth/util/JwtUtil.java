@@ -27,6 +27,9 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private Long expiration;
     
+    @Value("${jwt.expiration-remember-me}")
+    private Long expirationRememberMe;
+    
     /**
      * Generate secret key from configured secret string
      */
@@ -43,20 +46,40 @@ public class JwtUtil {
      * @return generated JWT token
      */
     public String generateToken(UUID userId, String email, java.util.Set<String> roles) {
+        return generateToken(userId, email, roles, false);
+    }
+    
+    /**
+     * Generate JWT token for user with optional remember me
+     * @param userId the user's UUID
+     * @param email the user's email
+     * @param roles the user's roles
+     * @param rememberMe whether to use extended expiration
+     * @return generated JWT token
+     */
+    public String generateToken(UUID userId, String email, java.util.Set<String> roles, boolean rememberMe) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId.toString());
         claims.put("email", email);
         claims.put("roles", roles);
         
-        return createToken(claims, email);
+        return createToken(claims, email, rememberMe);
     }
     
     /**
      * Create JWT token with claims and subject
      */
     private String createToken(Map<String, Object> claims, String subject) {
+        return createToken(claims, subject, false);
+    }
+    
+    /**
+     * Create JWT token with claims, subject, and optional remember me
+     */
+    private String createToken(Map<String, Object> claims, String subject, boolean rememberMe) {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expiration);
+        Long tokenExpiration = rememberMe ? expirationRememberMe : expiration;
+        Date expiryDate = new Date(now.getTime() + tokenExpiration);
         
         return Jwts.builder()
                 .claims(claims)

@@ -4,6 +4,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8
 
 class ApiClient {
   private client: AxiosInstance
+  private isLoggingOut: boolean = false
 
   constructor() {
     this.client = axios.create({
@@ -59,18 +60,19 @@ class ApiClient {
         return response
       },
       async (error: AxiosError) => {
-        // Log error in development (but not 404s as they're often expected)
-        if (process.env.NODE_ENV === 'development' && error.response?.status !== 404) {
+        // Log error in development
+        if (process.env.NODE_ENV === 'development') {
           console.error('[API Response Error]', {
             status: error.response?.status,
             url: error.config?.url,
             message: error.message,
             data: error.response?.data,
+            fullError: error,
           })
         }
 
-        // Handle 401 Unauthorized - token expired
-        if (error.response?.status === 401) {
+        // Handle 401 Unauthorized - token expired (but not during logout)
+        if (error.response?.status === 401 && !this.isLoggingOut) {
           this.handleUnauthorized()
         }
 
@@ -109,8 +111,8 @@ class ApiClient {
     localStorage.removeItem('refresh_token')
     localStorage.removeItem('user')
 
-    // Redirect to login page
-    window.location.href = '/login'
+    // Redirect to landing page
+    window.location.href = '/'
   }
 
   private getErrorMessage(error: AxiosError): string {
@@ -164,8 +166,20 @@ class ApiClient {
   }
 
   async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.client.post<T>(url, data, config)
-    return response.data
+    // Mark if this is a logout request
+    if (url === '/auth/logout') {
+      this.isLoggingOut = true
+    }
+    
+    try {
+      const response = await this.client.post<T>(url, data, config)
+      return response.data
+    } finally {
+      // Reset logout flag
+      if (url === '/auth/logout') {
+        this.isLoggingOut = false
+      }
+    }
   }
 
   async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {

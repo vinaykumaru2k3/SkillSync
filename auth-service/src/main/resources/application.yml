@@ -30,10 +30,15 @@ spring:
             authorization-uri: https://github.com/login/oauth/authorize
             token-uri: https://github.com/login/oauth/access_token
             user-info-uri: https://api.github.com/user
+            user-name-attribute: login
 
 jwt:
   secret: ${JWT_SECRET:mySecretKeyForSkillSyncPlatformThatIsLongEnough}
-  expiration: 86400000 # 24 hours
+  expiration: 86400000 # 24 hours (1 day)
+  expiration-remember-me: 2592000000 # 30 days
+
+frontend:
+  url: ${FRONTEND_URL:http://localhost:3000}
 
 management:
   endpoints:

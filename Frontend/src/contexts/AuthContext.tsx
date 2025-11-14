@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { authService } from '@/lib/api/services/authService'
 import type { User, AuthContextType, LoginRequest, RegisterRequest } from '@/types/auth'
+import { useTokenRefresh } from '@/hooks/useTokenRefresh'
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -13,6 +14,9 @@ const USER_KEY = 'user'
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+
+  // Auto-refresh tokens before expiration
+  useTokenRefresh()
 
   // Load user from localStorage on mount
   useEffect(() => {
@@ -87,11 +91,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
       if (refreshToken) {
-        await authService.logout(refreshToken)
+        // Attempt to logout on server, but don't fail if it errors
+        await authService.logout(refreshToken).catch(() => {
+          // Silently ignore logout API errors - user is logging out anyway
+        })
       }
-    } catch (error) {
-      console.error('Logout failed:', error)
     } finally {
+      // Always clear local auth data regardless of API call result
       clearAuthData()
     }
   }, [clearAuthData])

@@ -22,6 +22,22 @@ export function LoginForm() {
   const { login, loginWithGithub } = useAuth()
   const { success, error: showError } = useToast()
   const [isLoading, setIsLoading] = useState(false)
+  const [oauthError, setOauthError] = useState<string | null>(null)
+
+  // Check for OAuth error in URL
+  useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const error = params.get('error')
+      if (error === 'oauth_failed') {
+        setOauthError('GitHub authentication failed. Please try again.')
+      } else if (error === 'invalid_callback') {
+        setOauthError('Invalid OAuth callback. Please try again.')
+      } else if (error === 'callback_failed') {
+        setOauthError('Failed to complete authentication. Please try again.')
+      }
+    }
+  })
 
   const {
     register,
@@ -50,10 +66,39 @@ export function LoginForm() {
 
   return (
     <div className="w-full max-w-md space-y-6">
+      <div className="mb-4">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => router.push('/')}
+          className="flex items-center gap-2"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Home
+        </Button>
+      </div>
       <div className="text-center">
         <h1 className="text-3xl font-bold">Welcome Back</h1>
         <p className="mt-2 text-gray-600 dark:text-gray-400">Sign in to your account</p>
       </div>
+
+      {oauthError && (
+        <div className="rounded-lg bg-red-50 p-4 dark:bg-red-900/20">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-800 dark:text-red-200">{oauthError}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>

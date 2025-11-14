@@ -59,6 +59,20 @@ export function RegisterForm() {
 
   return (
     <div className="w-full max-w-md space-y-6">
+      <div className="mb-4">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => router.push('/')}
+          className="flex items-center gap-2"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Home
+        </Button>
+      </div>
       <div className="text-center">
         <h1 className="text-3xl font-bold">Create Account</h1>
         <p className="mt-2 text-gray-600 dark:text-gray-400">Sign up to get started</p>

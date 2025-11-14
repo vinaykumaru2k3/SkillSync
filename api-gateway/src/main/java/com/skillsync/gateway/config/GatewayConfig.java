@@ -40,9 +40,9 @@ public class GatewayConfig {
                         .uri("http://localhost:8081")
                 )
                 
-                // User Service Routes
+                // User Service Routes (both /users and /user paths)
                 .route("user-service", r -> r
-                        .path("/api/v1/users/**")
+                        .path("/api/v1/users/**", "/api/v1/user/**")
                         .filters(f -> f
                                 .filter(new SecurityHeadersFilter())
                                 .requestRateLimiter(config -> config

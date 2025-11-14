@@ -34,7 +34,7 @@ export const authService = {
    * Initiate GitHub OAuth login
    */
   loginWithGithub: (): void => {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1'
-    window.location.href = `${apiBaseUrl}/auth/oauth/github/login`
+    // Redirect directly to Spring Security's OAuth2 endpoint
+    window.location.href = 'http://localhost:8081/oauth2/authorization/github'
   },
 }

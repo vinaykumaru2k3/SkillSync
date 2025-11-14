@@ -15,7 +15,12 @@ public class SecurityConfig {
         http
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
             .authorizeExchange(exchange -> exchange
-                .anyExchange().permitAll()
+                // Public endpoints
+                .pathMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/token/refresh").permitAll()
+                .pathMatchers("/api/v1/auth/oauth/**", "/oauth2/**", "/login/oauth2/**").permitAll()
+                .pathMatchers("/actuator/**").permitAll()
+                // All other endpoints require authentication (handled by JwtAuthenticationFilter)
+                .anyExchange().permitAll() // Filter handles auth, so permit here
             );
         
         return http.build();

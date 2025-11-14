@@ -16,9 +16,15 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class SecurityConfig {
     
     private final CorsConfigurationSource corsConfigurationSource;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
     
-    public SecurityConfig(@Qualifier("corsConfigurationSource") CorsConfigurationSource corsConfigurationSource) {
+    public SecurityConfig(@Qualifier("corsConfigurationSource") CorsConfigurationSource corsConfigurationSource,
+                         OAuth2SuccessHandler oAuth2SuccessHandler,
+                         CustomOAuth2UserService customOAuth2UserService) {
         this.corsConfigurationSource = corsConfigurationSource;
+        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
+        this.customOAuth2UserService = customOAuth2UserService;
     }
     
     /**
@@ -45,7 +51,10 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
-                .defaultSuccessUrl("/api/v1/auth/oauth/github/callback", true)
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(customOAuth2UserService)
+                )
+                .successHandler(oAuth2SuccessHandler)
             );
         
         return http.build();

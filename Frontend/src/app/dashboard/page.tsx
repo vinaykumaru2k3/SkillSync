@@ -6,14 +6,26 @@ import { Button } from '@/components/common/Button'
 import { Card } from '@/components/common/Card'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useQuery } from '@tanstack/react-query'
+import { userService } from '@/lib/api/services/userService'
 
 export default function DashboardPage() {
   const { user, logout } = useAuth()
   const router = useRouter()
 
+  // Check if user has a profile
+  const { data: userProfile, isLoading: profileLoading } = useQuery({
+    queryKey: ['userProfile', user?.userId],
+    queryFn: () => userService.getProfileByUserId(user!.userId),
+    enabled: !!user?.userId,
+    retry: false,
+  })
+
+  const hasProfile = !!userProfile
+
   const handleLogout = async () => {
     await logout()
-    router.push('/login')
+    window.location.href = '/'
   }
 
   return (
@@ -30,16 +42,36 @@ export default function DashboardPage() {
                   <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
                     Dashboard
                   </Link>
-                  <Link href={`/profile/${user?.userId}`} className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-                    My Profile
-                  </Link>
+                  {!hasProfile && (
+                    <Link href={`/profile/${user?.userId}`} className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+                      My Profile
+                    </Link>
+                  )}
                   <Link href="/search" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
                     Discover
                   </Link>
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <span className="text-sm text-gray-600 dark:text-gray-400">{user?.email}</span>
+                {hasProfile && (
+                  <button
+                    onClick={() => router.push(`/profile/${user?.userId}`)}
+                    className="flex items-center gap-2 rounded-full hover:opacity-80 transition-opacity"
+                    title="View Profile"
+                  >
+                    {userProfile?.profileImageUrl ? (
+                      <img
+                        src={userProfile.profileImageUrl}
+                        alt="Profile"
+                        className="h-8 w-8 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
+                      />
+                    ) : (
+                      <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium text-sm">
+                        {user?.email?.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </button>
+                )}
                 <Button variant="outline" size="sm" onClick={handleLogout}>
                   Logout
                 </Button>
@@ -49,24 +81,26 @@ export default function DashboardPage() {
         </nav>
 
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          {/* Create Profile Banner */}
-          <div className="mb-6 rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0">
-                <svg className="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-sm font-medium text-blue-800 dark:text-blue-300">
-                  Complete Your Profile
-                </h3>
-                <p className="mt-1 text-sm text-blue-700 dark:text-blue-400">
-                  Click "My Profile" to create your profile and start connecting with other developers.
-                </p>
+          {/* Create Profile Banner - Only show if user doesn't have a profile */}
+          {!profileLoading && !hasProfile && (
+            <div className="mb-6 rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0">
+                  <svg className="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                    Complete Your Profile
+                  </h3>
+                  <p className="mt-1 text-sm text-blue-700 dark:text-blue-400">
+                    Click "My Profile" to create your profile and start connecting with other developers.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Welcome back!</h2>

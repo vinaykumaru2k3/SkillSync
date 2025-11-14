@@ -32,6 +32,9 @@ public class AuthService {
     @Value("${jwt.expiration}")
     private Long jwtExpiration;
     
+    @Value("${jwt.expiration-remember-me}")
+    private Long jwtExpirationRememberMe;
+    
     public AuthService(UserRepository userRepository, 
                       TokenBlacklistRepository tokenBlacklistRepository,
                       PasswordEncoder passwordEncoder, 
@@ -69,7 +72,7 @@ public class AuthService {
      */
     @Transactional
     public AuthResponse login(LoginRequest request) {
-        logger.info("Login attempt for email: {}", request.getEmail());
+        logger.info("Login attempt for email: {} (rememberMe: {})", request.getEmail(), request.isRememberMe());
         
         User user = userRepository.findActiveUserByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
@@ -81,8 +84,8 @@ public class AuthService {
         user.setLastLoginAt(LocalDateTime.now());
         userRepository.save(user);
         
-        logger.info("User logged in successfully: {}", user.getId());
-        return generateAuthResponse(user);
+        logger.info("User logged in successfully: {} (rememberMe: {})", user.getId(), request.isRememberMe());
+        return generateAuthResponse(user, request.isRememberMe());
     }
     
     /**
@@ -156,8 +159,17 @@ public class AuthService {
      * Generate authentication response with tokens
      */
     private AuthResponse generateAuthResponse(User user) {
-        String accessToken = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRoles());
-        String refreshToken = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRoles());
+        return generateAuthResponse(user, false);
+    }
+    
+    /**
+     * Generate authentication response with tokens and optional remember me
+     */
+    private AuthResponse generateAuthResponse(User user, boolean rememberMe) {
+        String accessToken = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRoles(), rememberMe);
+        String refreshToken = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRoles(), rememberMe);
+        
+        Long tokenExpiration = rememberMe ? jwtExpirationRememberMe : jwtExpiration;
         
         return new AuthResponse(
             user.getId(),
@@ -165,7 +177,7 @@ public class AuthService {
             accessToken,
             refreshToken,
             user.getRoles(),
-            jwtExpiration
+            tokenExpiration
         );
     }
     

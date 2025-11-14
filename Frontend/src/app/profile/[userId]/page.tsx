@@ -4,6 +4,7 @@ import { use } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { UserProfileView } from '@/components/features/profile'
 import { CreateProfilePrompt } from '@/components/features/profile/CreateProfilePrompt'
+import { ProtectedRoute } from '@/components/auth'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/common/Button'
 import { Spinner } from '@/components/common/Spinner'
@@ -55,10 +56,11 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
 
   const handleLogout = async () => {
     await logout()
-    router.push('/login')
+    window.location.href = '/'
   }
 
   return (
+    <ProtectedRoute>
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <nav className="border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-800">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -117,5 +119,6 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
         )}
       </main>
     </div>
+    </ProtectedRoute>
   )
 }

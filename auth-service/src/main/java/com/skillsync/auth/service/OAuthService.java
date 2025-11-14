@@ -2,7 +2,6 @@ package com.skillsync.auth.service;
 
 import com.skillsync.auth.dto.AuthResponse;
 import com.skillsync.auth.entity.User;
-import com.skillsync.auth.repository.UserRepository;
 import com.skillsync.auth.util.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,57 +10,103 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-
 @Service
 public class OAuthService {
     
     private static final Logger logger = LoggerFactory.getLogger(OAuthService.class);
     
-    private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    private final AccountLinkingService accountLinkingService;
     
     @Value("${jwt.expiration}")
     private Long jwtExpiration;
     
-    public OAuthService(UserRepository userRepository, JwtUtil jwtUtil) {
-        this.userRepository = userRepository;
+    public OAuthService(JwtUtil jwtUtil,
+                       AccountLinkingService accountLinkingService) {
         this.jwtUtil = jwtUtil;
+        this.accountLinkingService = accountLinkingService;
     }
     
     /**
      * Process OAuth authentication from GitHub
+     * Uses AccountLinkingService to safely link or create accounts
      */
     @Transactional
     public AuthResponse processOAuthLogin(OAuth2User oAuth2User, String provider) {
         logger.info("Processing OAuth login for provider: {}", provider);
+        logger.info("OAuth user attributes: {}", oAuth2User.getAttributes());
         
-        String email = oAuth2User.getAttribute("email");
+        String email = extractEmail(oAuth2User, provider);
+        String oauthId = extractOAuthId(oAuth2User, provider);
+        
+        // Validate email
         if (email == null || email.isEmpty()) {
-            throw new IllegalArgumentException("Email not provided by OAuth provider");
+            logger.error("Email extraction failed for provider: {}", provider);
+            throw new IllegalArgumentException("Email not provided by OAuth provider. Please make your email public in your " + provider + " settings.");
         }
         
-        Optional<User> existingUser = userRepository.findByEmail(email);
-        User user;
-        
-        if (existingUser.isPresent()) {
-            user = existingUser.get();
-            user.addOauthProvider(provider);
-            logger.info("Existing user found, adding OAuth provider: {}", provider);
-        } else {
-            user = new User();
-            user.setEmail(email);
-            user.addOauthProvider(provider);
-            user.setIsActive(true);
-            logger.info("Creating new user from OAuth: {}", email);
+        // Check if account can be linked
+        if (!accountLinkingService.canLinkAccount(email, provider)) {
+            logger.error("Cannot link account for email: {} with provider: {}", email, provider);
+            throw new IllegalArgumentException("Cannot link account. Please contact support.");
         }
         
-        user.setLastLoginAt(LocalDateTime.now());
-        user = userRepository.save(user);
+        // Link or create account
+        User user = accountLinkingService.linkOrCreateAccount(email, provider, oauthId);
         
-        logger.info("OAuth login successful for user: {}", user.getId());
+        logger.info("OAuth login successful for user: {} (email: {}, provider: {})", 
+                   user.getId(), email, provider);
+        
         return generateAuthResponse(user);
+    }
+    
+    /**
+     * Extract email from OAuth provider
+     */
+    private String extractEmail(OAuth2User oAuth2User, String provider) {
+        String email = oAuth2User.getAttribute("email");
+        
+        // GitHub-specific: try to get email from emails list
+        if ((email == null || email.isEmpty()) && "github".equalsIgnoreCase(provider)) {
+            // GitHub may not include email in user object, but it's available in the attributes
+            // Spring Security OAuth2 should fetch it with user:email scope
+            Object emailsObj = oAuth2User.getAttributes().get("email");
+            if (emailsObj != null) {
+                email = emailsObj.toString();
+            }
+            
+            // Last resort fallback
+            if (email == null || email.isEmpty()) {
+                String login = oAuth2User.getAttribute("login");
+                if (login != null && !login.isEmpty()) {
+                    email = login + "@github.user";
+                    logger.warn("GitHub email not available, using fallback: {}", email);
+                    logger.warn("Please make your email public in GitHub settings or grant email access");
+                }
+            }
+        }
+        
+        return email;
+    }
+    
+    /**
+     * Extract OAuth provider-specific user ID
+     */
+    private String extractOAuthId(OAuth2User oAuth2User, String provider) {
+        Object id = oAuth2User.getAttribute("id");
+        if (id != null) {
+            return id.toString();
+        }
+        
+        // GitHub uses "login" as username
+        if ("github".equalsIgnoreCase(provider)) {
+            String login = oAuth2User.getAttribute("login");
+            if (login != null) {
+                return login;
+            }
+        }
+        
+        return null;
     }
     
     /**
