@@ -28,3 +28,6 @@ export type { ToastType, ToastMessage } from './Toast'
 
 export { Navigation } from './Navigation'
 export { Breadcrumb } from './Breadcrumb'
+
+export { Tooltip } from './Tooltip'
+export type { TooltipProps } from './Tooltip'

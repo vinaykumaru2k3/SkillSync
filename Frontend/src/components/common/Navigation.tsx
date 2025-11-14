@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
 import { userService } from '@/lib/api/services/userService'
 import { Button } from './Button'
+import { ThemeToggle } from './ThemeToggle'
 
 export function Navigation() {
   const { user, logout } = useAuth()
@@ -32,11 +33,20 @@ export function Navigation() {
     
     // Exact match for dashboard
     if (path === '/dashboard') {
-      return pathname === path
+      return pathname === '/dashboard'
+    }
+    
+    // For GitHub integration, check exact match or with trailing slash
+    if (path === '/profile/github') {
+      return pathname === '/profile/github' || pathname.startsWith('/profile/github/')
+    }
+    
+    // For profile paths, check if it starts with /profile/ followed by a UUID
+    if (path === '/profile') {
+      return pathname.startsWith('/profile/') && !pathname.startsWith('/profile/github')
     }
     
     // For other paths, check if pathname starts with the path
-    // but make sure it's a complete segment match (not just a prefix)
     if (pathname.startsWith(path)) {
       // Check if it's an exact match or followed by a slash
       return pathname === path || pathname.charAt(path.length) === '/'
@@ -63,20 +73,22 @@ export function Navigation() {
               <Link href="/dashboard" className={getLinkClass('/dashboard')}>
                 Dashboard
               </Link>
-              {!hasProfile && (
-                <Link href={`/profile/${user?.userId}`} className={getLinkClass('/profile')}>
-                  My Profile
-                </Link>
-              )}
+              <Link href={`/profile/${user?.userId}`} className={getLinkClass('/profile')}>
+                My Profile
+              </Link>
               <Link href="/projects" className={getLinkClass('/projects')}>
                 Projects
+              </Link>
+              <Link href="/profile/github" className={getLinkClass('/profile/github')}>
+                GitHub
               </Link>
               <Link href="/search" className={getLinkClass('/search')}>
                 Discover
               </Link>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
             {hasProfile && (
               <button
                 onClick={() => router.push(`/profile/${user?.userId}`)}

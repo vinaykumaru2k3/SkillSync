@@ -4,8 +4,8 @@ import { ProtectedRoute } from '@/components/auth'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/common/Button'
 import { Card } from '@/components/common/Card'
+import { Navigation } from '@/components/common/Navigation'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
 import { userService } from '@/lib/api/services/userService'
 
@@ -31,57 +31,7 @@ export default function DashboardPage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <nav className="border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-800">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 items-center justify-between">
-              <div className="flex items-center gap-8">
-                <Link href="/dashboard">
-                  <h1 className="text-xl font-bold cursor-pointer hover:text-blue-600">SkillSync</h1>
-                </Link>
-                <div className="hidden md:flex gap-6">
-                  <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-                    Dashboard
-                  </Link>
-                  {!hasProfile && (
-                    <Link href={`/profile/${user?.userId}`} className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-                      My Profile
-                    </Link>
-                  )}
-                  <Link href="/projects" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-                    Projects
-                  </Link>
-                  <Link href="/search" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-                    Discover
-                  </Link>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                {hasProfile && (
-                  <button
-                    onClick={() => router.push(`/profile/${user?.userId}`)}
-                    className="flex items-center gap-2 rounded-full hover:opacity-80 transition-opacity"
-                    title="View Profile"
-                  >
-                    {userProfile?.profileImageUrl ? (
-                      <img
-                        src={userProfile.profileImageUrl}
-                        alt="Profile"
-                        className="h-8 w-8 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
-                      />
-                    ) : (
-                      <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium text-sm">
-                        {user?.email?.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                  </button>
-                )}
-                <Button variant="outline" size="sm" onClick={handleLogout}>
-                  Logout
-                </Button>
-              </div>
-            </div>
-          </div>
-        </nav>
+        <Navigation />
 
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Create Profile Banner - Only show if user doesn't have a profile */}

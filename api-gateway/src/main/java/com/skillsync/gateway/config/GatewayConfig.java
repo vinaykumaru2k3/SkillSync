@@ -74,7 +74,6 @@ public class GatewayConfig {
                 .route("github-service", r -> r
                         .path("/api/v1/github/**")
                         .filters(f -> f
-                                .stripPrefix(2)
                                 .filter(new SecurityHeadersFilter())
                                 .requestRateLimiter(config -> config
                                         .setRateLimiter(redisRateLimiter)
