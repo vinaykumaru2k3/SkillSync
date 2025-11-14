@@ -44,6 +44,7 @@ public class GitHubRepositoryMapper {
         dto.setHtmlUrl(entity.getHtmlUrl());
         dto.setLanguage(entity.getLanguage());
         dto.setLanguages(entity.getLanguages());
+        dto.setCommitCount(entity.getCommitCount());
         dto.setStars(entity.getStars());
         dto.setForks(entity.getForks());
         dto.setIsPrivate(entity.getIsPrivate());

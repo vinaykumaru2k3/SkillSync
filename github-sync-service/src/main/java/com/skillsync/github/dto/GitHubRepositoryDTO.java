@@ -36,6 +36,9 @@ public class GitHubRepositoryDTO {
     @JsonProperty("private")
     private Boolean isPrivate;
     
+    @JsonProperty("commit_count")
+    private Integer commitCount;
+    
     @JsonProperty("last_commit_at")
     private LocalDateTime lastCommitAt;
     
@@ -186,5 +189,13 @@ public class GitHubRepositoryDTO {
     
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    
+    public Integer getCommitCount() {
+        return commitCount;
+    }
+    
+    public void setCommitCount(Integer commitCount) {
+        this.commitCount = commitCount;
     }
 }

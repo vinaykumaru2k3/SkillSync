@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { GitHubSync, GitHubLanguageStats } from '@/components/features/profile';
+import { GitHubSync, GitHubLanguageStats, GitHubActivitySummary, GitHubContributionGraph } from '@/components/features/profile';
 import { Card } from '@/components/common/Card';
 import { Navigation } from '@/components/common/Navigation';
 import { Tooltip } from '@/components/common/Tooltip';
@@ -66,15 +66,19 @@ export default function GitHubIntegrationPage() {
           </p>
         </div>
 
+        {/* Contribution Graph */}
+        <GitHubContributionGraph />
+
         {/* Main Content */}
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-3 mt-6">
           {/* Left Column - Sync and Repositories */}
           <div className="lg:col-span-2">
             <GitHubSync />
           </div>
 
-          {/* Right Column - Language Stats */}
-          <div className="lg:col-span-1">
+          {/* Right Column - Stats */}
+          <div className="lg:col-span-1 space-y-6">
+            <GitHubActivitySummary />
             <GitHubLanguageStats userId={user.userId} />
           </div>
         </div>

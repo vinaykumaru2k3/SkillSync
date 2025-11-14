@@ -29,6 +29,7 @@ public class GitHubRepository {
     private Integer stars;
     private Integer forks;
     private Boolean isPrivate;
+    private Integer commitCount;
     private LocalDateTime lastCommitAt;
     private LocalDateTime syncedAt;
     private LocalDateTime createdAt;
@@ -175,5 +176,13 @@ public class GitHubRepository {
     
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    
+    public Integer getCommitCount() {
+        return commitCount;
+    }
+    
+    public void setCommitCount(Integer commitCount) {
+        this.commitCount = commitCount;
     }
 }

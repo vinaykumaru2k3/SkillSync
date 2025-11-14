@@ -89,4 +89,97 @@ public class GitHubApiClient {
                 .retrieve()
                 .bodyToMono(String.class);
     }
+    
+    @SuppressWarnings("unchecked")
+    public Mono<Integer> getRepositoryCommitCount(String owner, String repo, String accessToken) {
+        logger.debug("Fetching commit count for repository: {}/{}", owner, repo);
+        
+        // Use the participation stats endpoint which gives us commit counts
+        return webClient.get()
+                .uri("/repos/{owner}/{repo}/stats/participation", owner, repo)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .header(HttpHeaders.ACCEPT, "application/vnd.github.v3+json")
+                .retrieve()
+                .bodyToMono(Map.class)
+                .map(stats -> {
+                    // The participation endpoint returns all commits and owner commits
+                    Object allObj = stats.get("all");
+                    if (allObj instanceof java.util.List) {
+                        java.util.List<Integer> all = (java.util.List<Integer>) allObj;
+                        // Sum all weekly commit counts
+                        return all.stream().mapToInt(Integer::intValue).sum();
+                    }
+                    return 0;
+                })
+                .onErrorResume(error -> {
+                    // If stats endpoint fails, try the commits endpoint with pagination
+                    logger.debug("Stats endpoint failed for {}/{}, trying commits endpoint", owner, repo);
+                    return getCommitCountFromCommitsEndpoint(owner, repo, accessToken);
+                });
+    }
+    
+    public Mono<String> getUserLogin(String accessToken) {
+        logger.debug("Fetching user login from GitHub");
+        
+        return webClient.get()
+                .uri("/user")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .header(HttpHeaders.ACCEPT, "application/vnd.github.v3+json")
+                .retrieve()
+                .bodyToMono(Map.class)
+                .map(user -> (String) user.get("login"))
+                .onErrorReturn("");
+    }
+    
+    @SuppressWarnings("unchecked")
+    public Flux<Map<String, Object>> getUserEvents(String username, String accessToken) {
+        logger.debug("Fetching user events from GitHub for: {}", username);
+        
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/{username}/events")
+                        .queryParam("per_page", "100")
+                        .build(username))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .header(HttpHeaders.ACCEPT, "application/vnd.github.v3+json")
+                .retrieve()
+                .bodyToFlux(Map.class)
+                .map(event -> (Map<String, Object>) event);
+    }
+    
+    @SuppressWarnings("unchecked")
+    private Mono<Integer> getCommitCountFromCommitsEndpoint(String owner, String repo, String accessToken) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/repos/{owner}/{repo}/commits")
+                        .queryParam("per_page", "1")
+                        .build(owner, repo))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .header(HttpHeaders.ACCEPT, "application/vnd.github.v3+json")
+                .retrieve()
+                .toBodilessEntity()
+                .map(response -> {
+                    // Try to get count from Link header
+                    String linkHeader = response.getHeaders().getFirst("Link");
+                    if (linkHeader != null && linkHeader.contains("rel=\"last\"")) {
+                        try {
+                            String[] parts = linkHeader.split(",");
+                            for (String part : parts) {
+                                if (part.contains("rel=\"last\"")) {
+                                    String pageStr = part.split("page=")[1].split(">")[0].split("&")[0];
+                                    return Integer.parseInt(pageStr);
+                                }
+                            }
+                        } catch (Exception e) {
+                            logger.warn("Failed to parse Link header for {}/{}", owner, repo);
+                        }
+                    }
+                    // If no pagination, there's likely just 1 page of commits
+                    return 1;
+                })
+                .onErrorResume(error -> {
+                    logger.warn("Failed to fetch commit count for {}/{}: {}", owner, repo, error.getMessage());
+                    return Mono.just(0);
+                });
+    }
 }

@@ -9,6 +9,7 @@ export interface GitHubRepository {
   html_url: string;
   language: string | null;
   languages: Record<string, number>;
+  commit_count: number;
   stargazers_count: number;
   forks_count: number;
   private: boolean;
@@ -16,6 +17,17 @@ export interface GitHubRepository {
   synced_at: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface ActivitySummary {
+  totalCommits: number;
+  totalRepositories: number;
+  averageCommitsPerRepo: number;
+  mostActiveRepository?: {
+    name: string;
+    commitCount: number;
+    url: string;
+  };
 }
 
 export interface SyncStatus {

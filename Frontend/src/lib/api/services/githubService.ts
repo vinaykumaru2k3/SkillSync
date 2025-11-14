@@ -1,5 +1,5 @@
 import { apiClient } from '../client';
-import type { GitHubRepository, SyncStatus, LanguageStatistics, SyncResponse } from '@/types/github';
+import type { GitHubRepository, SyncStatus, LanguageStatistics, SyncResponse, ActivitySummary } from '@/types/github';
 
 export const githubService = {
   /**
@@ -36,6 +36,22 @@ export const githubService = {
    */
   getSyncStatus: async (): Promise<SyncStatus> => {
     const response = await apiClient.get<SyncStatus>('/github/sync/status');
+    return response;
+  },
+
+  /**
+   * Get activity summary for user
+   */
+  getActivitySummary: async (): Promise<ActivitySummary> => {
+    const response = await apiClient.get<ActivitySummary>('/github/activity/summary');
+    return response;
+  },
+
+  /**
+   * Get contribution calendar for user
+   */
+  getContributionCalendar: async (): Promise<Record<string, number>> => {
+    const response = await apiClient.get<Record<string, number>>('/github/activity/calendar');
     return response;
   },
 };

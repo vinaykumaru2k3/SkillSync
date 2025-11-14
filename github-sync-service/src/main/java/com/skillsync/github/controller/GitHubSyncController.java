@@ -120,4 +120,22 @@ public class GitHubSyncController {
         
         return ResponseEntity.ok(status);
     }
+    
+    @GetMapping("/activity/summary")
+    public ResponseEntity<Map<String, Object>> getActivitySummary(@RequestHeader("X-User-Id") String userId) {
+        logger.debug("Fetching activity summary for user: {}", userId);
+        
+        Map<String, Object> summary = gitHubSyncService.getActivitySummary(userId);
+        
+        return ResponseEntity.ok(summary);
+    }
+    
+    @GetMapping("/activity/calendar")
+    public ResponseEntity<Map<String, Integer>> getContributionCalendar(@RequestHeader("X-User-Id") String userId) {
+        logger.debug("Fetching contribution calendar for user: {}", userId);
+        
+        Map<String, Integer> calendar = gitHubSyncService.getContributionCalendar(userId);
+        
+        return ResponseEntity.ok(calendar);
+    }
 }

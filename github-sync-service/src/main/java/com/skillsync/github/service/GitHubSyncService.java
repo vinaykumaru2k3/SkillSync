@@ -2,9 +2,11 @@ package com.skillsync.github.service;
 
 import com.skillsync.github.client.GitHubApiClient;
 import com.skillsync.github.dto.GitHubRepositoryDTO;
+import com.skillsync.github.entity.CommitActivity;
 import com.skillsync.github.entity.GitHubRepository;
 import com.skillsync.github.entity.SyncStatus;
 import com.skillsync.github.mapper.GitHubRepositoryMapper;
+import com.skillsync.github.repository.CommitActivityRepository;
 import com.skillsync.github.repository.GitHubRepositoryRepository;
 import com.skillsync.github.repository.SyncStatusRepository;
 import org.slf4j.Logger;
@@ -12,7 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,14 +29,24 @@ public class GitHubSyncService {
     private final GitHubApiClient gitHubApiClient;
     private final GitHubRepositoryRepository repositoryRepository;
     private final SyncStatusRepository syncStatusRepository;
+    private final CommitActivityRepository commitActivityRepository;
     
     public GitHubSyncService(
             GitHubApiClient gitHubApiClient,
             GitHubRepositoryRepository repositoryRepository,
-            SyncStatusRepository syncStatusRepository) {
+            SyncStatusRepository syncStatusRepository,
+            CommitActivityRepository commitActivityRepository) {
         this.gitHubApiClient = gitHubApiClient;
         this.repositoryRepository = repositoryRepository;
         this.syncStatusRepository = syncStatusRepository;
+        this.commitActivityRepository = commitActivityRepository;
+    }
+    
+    private String extractOwnerFromFullName(String fullName) {
+        if (fullName != null && fullName.contains("/")) {
+            return fullName.split("/")[0];
+        }
+        return null;
     }
     
     public Mono<List<GitHubRepositoryDTO>> syncUserRepositories(String userId, String accessToken) {
@@ -43,17 +57,29 @@ public class GitHubSyncService {
         
         return gitHubApiClient.getUserRepositories(accessToken)
                 .flatMap(apiRepo -> {
-                    // Fetch language statistics for each repository
-                    return gitHubApiClient.getRepositoryLanguages(apiRepo.getLanguagesUrl(), accessToken)
-                            .map(languages -> {
-                                GitHubRepository entity = GitHubRepositoryMapper.toEntity(apiRepo, userId);
-                                entity.setLanguages(languages);
-                                return entity;
-                            })
+                    String owner = extractOwnerFromFullName(apiRepo.getFullName());
+                    
+                    // Fetch language statistics and commit count for each repository
+                    Mono<Map<String, Integer>> languagesMono = gitHubApiClient
+                            .getRepositoryLanguages(apiRepo.getLanguagesUrl(), accessToken)
                             .onErrorResume(error -> {
                                 logger.warn("Failed to fetch languages for repo {}: {}", apiRepo.getName(), error.getMessage());
+                                return Mono.just(Map.of());
+                            });
+                    
+                    Mono<Integer> commitCountMono = gitHubApiClient
+                            .getRepositoryCommitCount(owner, apiRepo.getName(), accessToken)
+                            .onErrorResume(error -> {
+                                logger.warn("Failed to fetch commit count for repo {}: {}", apiRepo.getName(), error.getMessage());
+                                return Mono.just(0);
+                            });
+                    
+                    return Mono.zip(languagesMono, commitCountMono)
+                            .map(tuple -> {
                                 GitHubRepository entity = GitHubRepositoryMapper.toEntity(apiRepo, userId);
-                                return Mono.just(entity);
+                                entity.setLanguages(tuple.getT1());
+                                entity.setCommitCount(tuple.getT2());
+                                return entity;
                             });
                 })
                 .collectList()
@@ -73,6 +99,7 @@ public class GitHubSyncService {
                                             existing.setHtmlUrl(repo.getHtmlUrl());
                                             existing.setLanguage(repo.getLanguage());
                                             existing.setLanguages(repo.getLanguages());
+                                            existing.setCommitCount(repo.getCommitCount());
                                             existing.setStars(repo.getStars());
                                             existing.setForks(repo.getForks());
                                             existing.setIsPrivate(repo.getIsPrivate());
@@ -89,6 +116,9 @@ public class GitHubSyncService {
                     updateSyncStatus(userId, "SUCCESS", null, savedRepos.size());
                     
                     logger.info("Successfully synced {} repositories for user: {}", savedRepos.size(), userId);
+                    
+                    // Update contribution data in the background
+                    updateContributionData(userId, accessToken).subscribe();
                     
                     return Mono.just(savedRepos.stream()
                             .map(GitHubRepositoryMapper::toDTO)
@@ -125,6 +155,140 @@ public class GitHubSyncService {
     public SyncStatus getSyncStatus(String userId) {
         return syncStatusRepository.findByUserId(userId)
                 .orElse(null);
+    }
+    
+    public Map<String, Object> getActivitySummary(String userId) {
+        logger.debug("Calculating activity summary for user: {}", userId);
+        List<GitHubRepository> repositories = repositoryRepository.findByUserId(userId);
+        
+        // Calculate total commits
+        int totalCommits = repositories.stream()
+                .filter(repo -> repo.getCommitCount() != null)
+                .mapToInt(GitHubRepository::getCommitCount)
+                .sum();
+        
+        // Find most active repository
+        GitHubRepository mostActiveRepo = repositories.stream()
+                .filter(repo -> repo.getCommitCount() != null && repo.getCommitCount() > 0)
+                .max((r1, r2) -> Integer.compare(r1.getCommitCount(), r2.getCommitCount()))
+                .orElse(null);
+        
+        // Calculate average commits per repository
+        double avgCommitsPerRepo = repositories.stream()
+                .filter(repo -> repo.getCommitCount() != null)
+                .mapToInt(GitHubRepository::getCommitCount)
+                .average()
+                .orElse(0.0);
+        
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("totalCommits", totalCommits);
+        summary.put("totalRepositories", repositories.size());
+        summary.put("averageCommitsPerRepo", Math.round(avgCommitsPerRepo));
+        
+        if (mostActiveRepo != null) {
+            Map<String, Object> mostActive = new HashMap<>();
+            mostActive.put("name", mostActiveRepo.getName());
+            mostActive.put("commitCount", mostActiveRepo.getCommitCount());
+            mostActive.put("url", mostActiveRepo.getHtmlUrl());
+            summary.put("mostActiveRepository", mostActive);
+        }
+        
+        return summary;
+    }
+    
+    public Map<String, Integer> getContributionCalendar(String userId) {
+        logger.debug("Fetching contribution calendar for user: {}", userId);
+        
+        // Get all repositories for the user
+        List<GitHubRepository> repositories = repositoryRepository.findByUserId(userId);
+        
+        // Create a simulated contribution calendar based on repository data
+        Map<String, Integer> calendar = new HashMap<>();
+        
+        // For each repository, add contributions based on last commit date
+        repositories.forEach(repo -> {
+            if (repo.getLastCommitAt() != null) {
+                String dateKey = repo.getLastCommitAt().toLocalDate().toString();
+                // Add 1-5 contributions per repository on its last commit date
+                int contributions = Math.min(repo.getCommitCount() != null ? repo.getCommitCount() / 10 : 1, 5);
+                calendar.merge(dateKey, Math.max(contributions, 1), Integer::sum);
+            }
+        });
+        
+        // Also check stored commit activities
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusYears(1);
+        
+        List<CommitActivity> activities = commitActivityRepository.findByUserIdAndDateBetween(
+                userId, startDate, endDate);
+        
+        // Merge with stored activities
+        activities.forEach(activity -> {
+            calendar.merge(activity.getDate().toString(), activity.getCommitCount(), Integer::sum);
+        });
+        
+        return calendar;
+    }
+    
+    public Mono<Void> updateContributionData(String userId, String accessToken) {
+        logger.debug("Updating contribution data for user: {}", userId);
+        
+        // First get the user's GitHub username
+        return gitHubApiClient.getUserLogin(accessToken)
+                .flatMap(username -> {
+                    if (username.isEmpty()) {
+                        logger.warn("Could not fetch GitHub username for user: {}", userId);
+                        return Mono.empty();
+                    }
+                    
+                    // Fetch recent events (last 100 events)
+                    return gitHubApiClient.getUserEvents(username, accessToken)
+                            .collectList()
+                            .doOnNext(events -> {
+                                Map<LocalDate, Integer> dailyCommits = new HashMap<>();
+                                
+                                // Process events to extract commit dates
+                                events.forEach(event -> {
+                                    String type = (String) event.get("type");
+                                    if ("PushEvent".equals(type)) {
+                                        String createdAt = (String) event.get("created_at");
+                                        if (createdAt != null) {
+                                            try {
+                                                LocalDate date = LocalDateTime.parse(createdAt.substring(0, 19))
+                                                        .toLocalDate();
+                                                
+                                                // Count commits in this push event
+                                                @SuppressWarnings("unchecked")
+                                                Map<String, Object> payload = (Map<String, Object>) event.get("payload");
+                                                if (payload != null) {
+                                                    @SuppressWarnings("unchecked")
+                                                    java.util.List<Object> commits = (java.util.List<Object>) payload.get("commits");
+                                                    int commitCount = commits != null ? commits.size() : 1;
+                                                    dailyCommits.merge(date, commitCount, Integer::sum);
+                                                }
+                                            } catch (Exception e) {
+                                                logger.warn("Failed to parse event date: {}", createdAt);
+                                            }
+                                        }
+                                    }
+                                });
+                                
+                                // Save or update commit activity records
+                                dailyCommits.forEach((date, count) -> {
+                                    CommitActivity activity = commitActivityRepository
+                                            .findByUserIdAndDate(userId, date)
+                                            .orElse(new CommitActivity(userId, date, 0));
+                                    
+                                    activity.setCommitCount(count);
+                                    activity.setUpdatedAt(LocalDateTime.now());
+                                    commitActivityRepository.save(activity);
+                                });
+                                
+                                logger.info("Updated contribution data for user {} with {} days of activity", 
+                                        userId, dailyCommits.size());
+                            })
+                            .then();
+                });
     }
     
     private void updateSyncStatus(String userId, String status, String errorMessage, int repositoriesSynced) {
