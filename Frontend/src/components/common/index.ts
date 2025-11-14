@@ -25,3 +25,6 @@ export { ErrorBoundary } from './ErrorBoundary'
 
 export { Toast, ToastContainer } from './Toast'
 export type { ToastType, ToastMessage } from './Toast'
+
+export { Navigation } from './Navigation'
+export { Breadcrumb } from './Breadcrumb'

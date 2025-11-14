@@ -57,9 +57,8 @@ public class GatewayConfig {
                 
                 // Project Service Routes
                 .route("project-service", r -> r
-                        .path("/api/v1/projects/**")
+                        .path("/api/v1/projects/**", "/api/v1/tasks/**")
                         .filters(f -> f
-                                .stripPrefix(2)
                                 .filter(new SecurityHeadersFilter())
                                 .requestRateLimiter(config -> config
                                         .setRateLimiter(redisRateLimiter)

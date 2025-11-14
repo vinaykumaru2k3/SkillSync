@@ -47,6 +47,9 @@ export default function DashboardPage() {
                       My Profile
                     </Link>
                   )}
+                  <Link href="/projects" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+                    Projects
+                  </Link>
                   <Link href="/search" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
                     Discover
                   </Link>

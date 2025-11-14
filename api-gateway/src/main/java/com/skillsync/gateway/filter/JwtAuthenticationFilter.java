@@ -36,7 +36,9 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         "/api/v1/auth/oauth",
         "/oauth2",
         "/login/oauth2",
-        "/actuator"
+        "/actuator",
+        "/api/v1/projects",
+        "/api/v1/tasks"
     );
     
     @Override
