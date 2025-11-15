@@ -60,6 +60,14 @@ export const collaborationApi = {
     return response.data
   },
 
+  // Get enriched pending invitations
+  getEnrichedPendingInvitations: async (): Promise<any[]> => {
+    const response = await apiClient.get<ApiResponse<any[]>>(
+      '/collaborations/invites/pending/enriched'
+    )
+    return response.data
+  },
+
   // Get sent invitations
   getSentInvitations: async (): Promise<Collaboration[]> => {
     const response = await apiClient.get<ApiResponse<Collaboration[]>>(

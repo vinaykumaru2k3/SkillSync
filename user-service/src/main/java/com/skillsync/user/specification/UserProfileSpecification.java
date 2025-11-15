@@ -20,14 +20,18 @@ public class UserProfileSpecification {
             // Only show public profiles in search
             predicates.add(criteriaBuilder.equal(root.get("visibility"), Visibility.PUBLIC));
 
-            // Fuzzy search on display name and bio
-            if (request.getQuery() != null && !request.getQuery().isEmpty()) {
-                String searchPattern = "%" + request.getQuery().toLowerCase() + "%";
+            // Fuzzy search on username, display name and bio
+            if (request.getQuery() != null && !request.getQuery().trim().isEmpty()) {
+                String searchPattern = "%" + request.getQuery().toLowerCase().trim() + "%";
+                
+                Predicate usernamePredicate = criteriaBuilder.like(
+                        criteriaBuilder.lower(criteriaBuilder.coalesce(root.get("username"), criteriaBuilder.literal(""))), searchPattern);
                 Predicate namePredicate = criteriaBuilder.like(
                         criteriaBuilder.lower(root.get("displayName")), searchPattern);
                 Predicate bioPredicate = criteriaBuilder.like(
-                        criteriaBuilder.lower(root.get("bio")), searchPattern);
-                predicates.add(criteriaBuilder.or(namePredicate, bioPredicate));
+                        criteriaBuilder.lower(criteriaBuilder.coalesce(root.get("bio"), criteriaBuilder.literal(""))), searchPattern);
+                
+                predicates.add(criteriaBuilder.or(usernamePredicate, namePredicate, bioPredicate));
             }
 
             // Filter by location

@@ -28,8 +28,10 @@ export default function ProjectsPage() {
       if (searchParams.searchTerm || searchParams.tags.length > 0 || searchParams.technologies.length > 0) {
         return projectService.searchProjects(searchParams)
       }
-      return projectService.discoverProjects()
+      return projectService.getMyProjects()
     },
+    retry: false,
+    throwOnError: false,
   })
 
   const createProjectMutation = useMutation({
@@ -60,18 +62,8 @@ export default function ProjectsPage() {
     )
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Navigation />
-        <div className="container mx-auto px-4 py-8">
-          <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded">
-            Error loading projects: {error instanceof Error ? error.message : 'Unknown error'}
-          </div>
-        </div>
-      </div>
-    )
-  }
+  // For new users or API errors, show empty state instead of error
+  const displayProjects = projects || []
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -92,7 +84,7 @@ export default function ProjectsPage() {
         />
 
         <ProjectList
-          projects={projects || []}
+          projects={displayProjects}
           emptyMessage="No projects found. Create your first project to get started!"
         />
 

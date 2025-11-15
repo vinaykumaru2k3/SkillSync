@@ -68,7 +68,7 @@ export function UserSearchFilters({ onSearch }: UserSearchFiltersProps) {
           id="query"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by name or bio..."
+          placeholder="Search by username, name, or bio..."
         />
       </div>
 

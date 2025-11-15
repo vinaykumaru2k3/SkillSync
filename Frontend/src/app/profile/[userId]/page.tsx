@@ -39,7 +39,8 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
   // Create profile mutation
   const createProfileMutation = useMutation({
     mutationFn: (data: any) => userService.createProfile({
-      userId: userId,
+      userId: user!.userId,
+      username: data.username,
       displayName: data.displayName,
       bio: data.bio,
       location: data.location,
@@ -98,7 +99,7 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
           </div>
         ) : !profile && isOwnProfile ? (
           <CreateProfilePrompt
-            userId={userId}
+            userId={user!.userId}
             onSubmit={(data) => createProfileMutation.mutate(data)}
             isSubmitting={createProfileMutation.isPending}
           />

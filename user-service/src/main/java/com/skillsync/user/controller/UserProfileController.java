@@ -32,7 +32,6 @@ public class UserProfileController {
             @Valid @RequestBody CreateUserProfileRequest request,
             @RequestHeader(value = "X-User-Id", required = false) String authenticatedUserId) {
         
-        // Verify user is creating their own profile
         if (authenticatedUserId == null || !authenticatedUserId.equals(request.getUserId().toString())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -50,6 +49,12 @@ public class UserProfileController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<UserProfileDto> getProfileByUserId(@PathVariable("userId") UUID userId) {
         UserProfileDto profile = userProfileService.getProfileByUserId(userId);
+        return ResponseEntity.ok(profile);
+    }
+
+    @GetMapping("/username/{username}")
+    public ResponseEntity<UserProfileDto> getProfileByUsername(@PathVariable("username") String username) {
+        UserProfileDto profile = userProfileService.getProfileByUsername(username);
         return ResponseEntity.ok(profile);
     }
 

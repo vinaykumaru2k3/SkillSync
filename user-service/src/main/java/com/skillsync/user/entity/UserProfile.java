@@ -24,6 +24,11 @@ public class UserProfile {
     @Column(nullable = false, unique = true)
     private UUID userId;
 
+    @NotBlank(message = "Username is required")
+    @Size(min = 3, max = 30, message = "Username must be between 3 and 30 characters")
+    @Column(nullable = false, unique = true, length = 30)
+    private String username;
+
     @NotBlank(message = "Display name is required")
     @Size(max = 100, message = "Display name must not exceed 100 characters")
     @Column(nullable = false, length = 100)
@@ -79,8 +84,9 @@ public class UserProfile {
     public UserProfile() {
     }
 
-    public UserProfile(UUID userId, String displayName) {
+    public UserProfile(UUID userId, String username, String displayName) {
         this.userId = userId;
+        this.username = username;
         this.displayName = displayName;
     }
 
@@ -110,6 +116,14 @@ public class UserProfile {
 
     public void setUserId(UUID userId) {
         this.userId = userId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getDisplayName() {

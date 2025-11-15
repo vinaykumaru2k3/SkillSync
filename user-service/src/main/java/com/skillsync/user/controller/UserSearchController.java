@@ -22,12 +22,12 @@ public class UserSearchController {
 
     @GetMapping
     public ResponseEntity<UserSearchResponse> searchProfiles(
-            @RequestParam(required = false) String query,
-            @RequestParam(required = false) List<String> skills,
-            @RequestParam(required = false) ProficiencyLevel minProficiencyLevel,
-            @RequestParam(required = false) String location,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(value = "query", required = false) String query,
+            @RequestParam(value = "skills", required = false) List<String> skills,
+            @RequestParam(value = "minProficiencyLevel", required = false) ProficiencyLevel minProficiencyLevel,
+            @RequestParam(value = "location", required = false) String location,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size) {
 
         UserSearchRequest request = new UserSearchRequest();
         request.setQuery(query);
@@ -43,8 +43,8 @@ public class UserSearchController {
 
     @GetMapping("/similar")
     public ResponseEntity<List<UserProfileDto>> findSimilarProfiles(
-            @RequestParam String skill,
-            @RequestParam(defaultValue = "10") int limit) {
+            @RequestParam(value = "skill") String skill,
+            @RequestParam(value = "limit", defaultValue = "10") int limit) {
         List<UserProfileDto> profiles = userSearchService.findSimilarProfiles(skill, limit);
         return ResponseEntity.ok(profiles);
     }

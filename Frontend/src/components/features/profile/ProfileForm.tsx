@@ -18,6 +18,7 @@ const urlSchema = z.string().transform((val) => {
 }).pipe(z.string().url('Invalid URL').or(z.literal('')))
 
 const profileSchema = z.object({
+  username: z.string().min(3, 'Username must be at least 3 characters').max(30, 'Username must not exceed 30 characters').regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores').optional(),
   displayName: z.string().min(1, 'Display name is required').max(100),
   bio: z.string().optional(),
   location: z.string().max(200).optional(),
@@ -44,6 +45,7 @@ export function ProfileForm({ defaultValues, onSubmit, isSubmitting = false }: P
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
+      username: defaultValues?.username || '',
       displayName: defaultValues?.displayName || '',
       bio: defaultValues?.bio || '',
       location: defaultValues?.location || '',
@@ -71,6 +73,19 @@ export function ProfileForm({ defaultValues, onSubmit, isSubmitting = false }: P
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      <div>
+        <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Username
+        </label>
+        <Input
+          id="username"
+          {...register('username')}
+          placeholder="your_username"
+          error={errors.username?.message}
+        />
+        <p className="mt-1 text-xs text-gray-500">3-30 characters, letters, numbers, and underscores only</p>
+      </div>
+
       <div>
         <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Display Name *

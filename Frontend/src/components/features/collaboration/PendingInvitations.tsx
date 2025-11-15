@@ -18,7 +18,7 @@ export default function PendingInvitations() {
     try {
       setIsLoading(true)
       setError(null)
-      const data = await collaborationApi.getPendingInvitations()
+      const data = await collaborationApi.getEnrichedPendingInvitations()
       setInvitations(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load invitations')
@@ -120,11 +120,23 @@ export default function PendingInvitations() {
                   {invitation.role}
                 </span>
               </div>
+              <div className="mb-3">
+                <h4 className="font-medium text-gray-900 dark:text-white">
+                  {invitation.projectName || `Project ${invitation.projectId?.substring(0, 8)}...`}
+                </h4>
+                {invitation.projectDescription && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    {invitation.projectDescription}
+                  </p>
+                )}
+              </div>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                From: User {invitation.inviterId.substring(0, 8)}...
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Project ID: {invitation.projectId.substring(0, 8)}...
+                From: <span className="font-medium">
+                  {invitation.inviterDisplayName || invitation.inviterUsername || `User ${invitation.inviterId?.substring(0, 8)}...`}
+                </span>
+                {invitation.inviterUsername && (
+                  <span className="text-gray-500"> (@{invitation.inviterUsername})</span>
+                )}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
                 Invited {new Date(invitation.invitedAt).toLocaleDateString()} • Expires{' '}

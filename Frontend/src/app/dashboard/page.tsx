@@ -6,22 +6,12 @@ import { Button } from '@/components/common/Button'
 import { Card } from '@/components/common/Card'
 import { Navigation } from '@/components/common/Navigation'
 import { useRouter } from 'next/navigation'
-import { useQuery } from '@tanstack/react-query'
-import { userService } from '@/lib/api/services/userService'
+import { useUserProfile } from '@/hooks/useUserProfile'
 
 export default function DashboardPage() {
   const { user, logout } = useAuth()
   const router = useRouter()
-
-  // Check if user has a profile
-  const { data: userProfile, isLoading: profileLoading } = useQuery({
-    queryKey: ['userProfile', user?.userId],
-    queryFn: () => userService.getProfileByUserId(user!.userId),
-    enabled: !!user?.userId,
-    retry: false,
-  })
-
-  const hasProfile = !!userProfile
+  const { profile: userProfile, isLoading: profileLoading, hasProfile } = useUserProfile()
 
   const handleLogout = async () => {
     await logout()

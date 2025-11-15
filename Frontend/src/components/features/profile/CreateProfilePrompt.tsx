@@ -10,6 +10,7 @@ import { Input } from '@/components/common/Input'
 import { Visibility } from '@/types/user'
 
 const createProfileSchema = z.object({
+  username: z.string().min(3, 'Username must be at least 3 characters').max(30, 'Username must not exceed 30 characters').regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
   displayName: z.string().min(1, 'Display name is required').max(100),
   bio: z.string().optional(),
   location: z.string().max(200).optional(),
@@ -31,6 +32,7 @@ export function CreateProfilePrompt({ userId, onSubmit, isSubmitting = false }: 
   } = useForm<CreateProfileFormData>({
     resolver: zodResolver(createProfileSchema),
     defaultValues: {
+      username: '',
       displayName: '',
       bio: '',
       location: '',
@@ -55,6 +57,19 @@ export function CreateProfilePrompt({ userId, onSubmit, isSubmitting = false }: 
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Username *
+            </label>
+            <Input
+              id="username"
+              {...register('username')}
+              placeholder="john_doe"
+              error={errors.username?.message}
+            />
+            <p className="mt-1 text-xs text-gray-500">This will be your unique identifier (3-30 characters, letters, numbers, and underscores only)</p>
+          </div>
+
           <div>
             <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Display Name *

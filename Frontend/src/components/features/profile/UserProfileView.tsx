@@ -36,6 +36,7 @@ export function UserProfileView({ userId, editable = false }: UserProfileViewPro
       userService.updateProfile(profile!.id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userProfile', userId] })
+      queryClient.invalidateQueries({ queryKey: ['userSearch'] })
       setIsEditingProfile(false)
       showToast('Profile updated successfully', 'success')
     },
@@ -139,9 +140,14 @@ export function UserProfileView({ userId, editable = false }: UserProfileViewPro
           <div className="flex-1 text-center md:text-left">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                  {profile.displayName}
-                </h1>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                    {profile.displayName}
+                  </h1>
+                  {profile.username && (
+                    <p className="text-lg text-gray-500 dark:text-gray-400">@{profile.username}</p>
+                  )}
+                </div>
                 {/* Visibility Badge */}
                 <div
                   className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium ${
@@ -277,6 +283,7 @@ export function UserProfileView({ userId, editable = false }: UserProfileViewPro
       >
         <ProfileForm
           defaultValues={{
+            username: profile.username,
             displayName: profile.displayName,
             bio: profile.bio,
             location: profile.location,

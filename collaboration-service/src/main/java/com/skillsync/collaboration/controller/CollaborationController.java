@@ -1,6 +1,7 @@
 package com.skillsync.collaboration.controller;
 
 import com.skillsync.collaboration.dto.CollaborationDTO;
+import com.skillsync.collaboration.dto.EnrichedInvitationDTO;
 import com.skillsync.collaboration.dto.InvitationRequest;
 import com.skillsync.collaboration.dto.InvitationResponse;
 import com.skillsync.collaboration.service.CollaborationService;
@@ -109,6 +110,18 @@ public class CollaborationController {
         logger.info("Fetching pending invitations for user {}", userId);
 
         List<CollaborationDTO> invitations = collaborationService.getPendingInvitations(userId);
+
+        return ResponseEntity.ok(ApiResponse.success(invitations));
+    }
+
+    @GetMapping("/invites/pending/enriched")
+    public ResponseEntity<ApiResponse<List<EnrichedInvitationDTO>>> getEnrichedPendingInvitations(
+            @RequestHeader("X-User-Id") String userIdStr) {
+        
+        UUID userId = UUID.fromString(userIdStr);
+        logger.info("Fetching enriched pending invitations for user {}", userId);
+
+        List<EnrichedInvitationDTO> invitations = collaborationService.getEnrichedPendingInvitations(userId);
 
         return ResponseEntity.ok(ApiResponse.success(invitations));
     }

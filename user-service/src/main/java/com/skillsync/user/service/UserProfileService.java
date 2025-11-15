@@ -36,9 +36,14 @@ public class UserProfileService {
         if (userProfileRepository.existsByUserId(request.getUserId())) {
             throw new DuplicateResourceException("Profile already exists for user: " + request.getUserId());
         }
+        
+        if (userProfileRepository.existsByUsername(request.getUsername())) {
+            throw new DuplicateResourceException("Username already taken: " + request.getUsername());
+        }
 
         UserProfile profile = new UserProfile();
         profile.setUserId(request.getUserId());
+        profile.setUsername(request.getUsername());
         profile.setDisplayName(request.getDisplayName());
         profile.setBio(request.getBio());
         profile.setLocation(request.getLocation());
@@ -64,10 +69,24 @@ public class UserProfileService {
         return mapper.toDto(profile);
     }
 
+    @Transactional(readOnly = true)
+    public UserProfileDto getProfileByUsername(String username) {
+        UserProfile profile = userProfileRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found for username: " + username));
+        return mapper.toDto(profile);
+    }
+
     public UserProfileDto updateProfile(UUID profileId, UpdateUserProfileRequest request) {
         UserProfile profile = userProfileRepository.findById(profileId)
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found: " + profileId));
 
+        if (request.getUsername() != null) {
+            if (userProfileRepository.existsByUsername(request.getUsername()) && 
+                !request.getUsername().equals(profile.getUsername())) {
+                throw new DuplicateResourceException("Username already taken: " + request.getUsername());
+            }
+            profile.setUsername(request.getUsername());
+        }
         if (request.getDisplayName() != null) {
             profile.setDisplayName(request.getDisplayName());
         }

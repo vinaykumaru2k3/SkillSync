@@ -11,15 +11,11 @@ export function useUserProfile() {
     queryKey: ['userProfile', user?.userId],
     queryFn: async () => {
       if (!user?.userId) throw new Error('No user ID')
-      try {
-        return await userService.getProfileByUserId(user.userId)
-      } catch (error) {
-        // Profile doesn't exist, return null
-        return null
-      }
+      return await userService.getProfileByUserId(user.userId)
     },
     enabled: !!user?.userId,
     retry: false,
+    throwOnError: false,
   })
 
   const createProfileMutation = useMutation({
@@ -29,8 +25,8 @@ export function useUserProfile() {
     },
   })
 
-  const hasProfile = !!profile
-  const needsProfile = !isLoading && !profile && !!user
+  const hasProfile = !!profile && !error
+  const needsProfile = !isLoading && (!profile || error) && !!user
 
   return {
     profile,

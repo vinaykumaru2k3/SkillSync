@@ -6,9 +6,10 @@ import { Badge } from '@/components/common/Badge'
 interface TaskCardProps {
   task: Task
   onClick: () => void
+  canEdit?: boolean
 }
 
-export function TaskCard({ task, onClick }: TaskCardProps) {
+export function TaskCard({ task, onClick, canEdit = true }: TaskCardProps) {
   const getPriorityColor = (priority: TaskPriority) => {
     switch (priority) {
       case TaskPriority.HIGH:
@@ -25,7 +26,10 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
   return (
     <div
       onClick={onClick}
-      className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-600"
+      className={`bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-600 ${
+        !canEdit ? 'opacity-75' : ''
+      }`}
+      title={!canEdit ? 'Read-only access' : undefined}
     >
       <div className="flex items-start justify-between mb-2">
         <h4 className="font-medium text-gray-900 dark:text-white text-sm">

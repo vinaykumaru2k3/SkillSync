@@ -24,12 +24,8 @@ public class ProjectController {
     
     @PostMapping
     public ResponseEntity<ProjectResponse> createProject(
-            @RequestHeader(value = "X-User-Id", required = false) UUID userId,
+            @RequestHeader(value = "X-User-Id") UUID userId,
             @Valid @RequestBody ProjectRequest request) {
-        // For now, use a default user ID if not provided (since endpoints are public for development)
-        if (userId == null) {
-            userId = UUID.fromString("5c845ec6-90d7-4429-a0fa-cf06ea01b4de"); // Default user ID
-        }
         log.info("Creating project for user: {}", userId);
         ProjectResponse response = projectService.createProject(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -49,6 +45,14 @@ public class ProjectController {
         return ResponseEntity.ok(projects);
     }
     
+    @GetMapping("/my-projects")
+    public ResponseEntity<List<ProjectResponse>> getMyProjects(
+            @RequestHeader(value = "X-User-Id") UUID userId) {
+        log.info("Fetching projects for current user: {}", userId);
+        List<ProjectResponse> projects = projectService.getProjectsByOwner(userId);
+        return ResponseEntity.ok(projects);
+    }
+    
     @GetMapping("/public")
     public ResponseEntity<List<ProjectResponse>> getAllPublicProjects() {
         log.info("Fetching all public projects");
@@ -59,12 +63,8 @@ public class ProjectController {
     @PutMapping("/{projectId}")
     public ResponseEntity<ProjectResponse> updateProject(
             @PathVariable("projectId") UUID projectId,
-            @RequestHeader(value = "X-User-Id", required = false) UUID userId,
+            @RequestHeader(value = "X-User-Id") UUID userId,
             @Valid @RequestBody ProjectRequest request) {
-        // For now, use a default user ID if not provided
-        if (userId == null) {
-            userId = UUID.fromString("5c845ec6-90d7-4429-a0fa-cf06ea01b4de");
-        }
         log.info("Updating project: {}", projectId);
         ProjectResponse response = projectService.updateProject(projectId, userId, request);
         return ResponseEntity.ok(response);
@@ -73,11 +73,7 @@ public class ProjectController {
     @DeleteMapping("/{projectId}")
     public ResponseEntity<Void> deleteProject(
             @PathVariable("projectId") UUID projectId,
-            @RequestHeader(value = "X-User-Id", required = false) UUID userId) {
-        // For now, use a default user ID if not provided
-        if (userId == null) {
-            userId = UUID.fromString("5c845ec6-90d7-4429-a0fa-cf06ea01b4de");
-        }
+            @RequestHeader(value = "X-User-Id") UUID userId) {
         log.info("Deleting project: {}", projectId);
         projectService.deleteProject(projectId, userId);
         return ResponseEntity.noContent().build();

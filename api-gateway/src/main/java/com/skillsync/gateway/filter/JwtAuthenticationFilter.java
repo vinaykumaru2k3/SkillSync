@@ -37,8 +37,10 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         "/oauth2",
         "/login/oauth2",
         "/actuator",
-        "/api/v1/projects",
-        "/api/v1/tasks",
+        "/api/v1/projects/public",  // Only public project discovery
+        "/api/v1/projects/discover",  // Only public project discovery
+        "/api/v1/projects/search",  // Only public project search
+        "/api/v1/users",  // Allow profile creation (temporary)
         "/api/v1/users/user",  // Allow viewing user profiles
         "/api/v1/users/search"  // Allow searching users
     );

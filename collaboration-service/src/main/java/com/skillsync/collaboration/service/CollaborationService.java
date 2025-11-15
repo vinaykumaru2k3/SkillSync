@@ -1,6 +1,9 @@
 package com.skillsync.collaboration.service;
 
+import com.skillsync.collaboration.client.ProjectServiceClient;
+import com.skillsync.collaboration.client.UserServiceClient;
 import com.skillsync.collaboration.dto.CollaborationDTO;
+import com.skillsync.collaboration.dto.EnrichedInvitationDTO;
 import com.skillsync.collaboration.dto.InvitationRequest;
 import com.skillsync.collaboration.entity.Collaboration;
 import com.skillsync.collaboration.entity.CollaborationStatus;
@@ -33,6 +36,12 @@ public class CollaborationService {
 
     @Autowired
     private EventPublisher eventPublisher;
+
+    @Autowired
+    private UserServiceClient userServiceClient;
+
+    @Autowired
+    private ProjectServiceClient projectServiceClient;
 
     @Transactional
     public CollaborationDTO createInvitation(UUID inviterId, InvitationRequest request) {
@@ -179,6 +188,44 @@ public class CollaborationService {
                 .filter(inv -> !inv.isExpired())
                 .map(collaborationMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    public List<EnrichedInvitationDTO> getEnrichedPendingInvitations(UUID userId) {
+        logger.debug("Fetching enriched pending invitations for user {}", userId);
+        
+        List<Collaboration> invitations = collaborationRepository
+                .findByInviteeIdAndStatus(userId, CollaborationStatus.PENDING);
+        
+        // Filter out expired invitations and enrich with user/project data
+        return invitations.stream()
+                .filter(inv -> !inv.isExpired())
+                .map(this::enrichInvitation)
+                .collect(Collectors.toList());
+    }
+
+    private EnrichedInvitationDTO enrichInvitation(Collaboration collaboration) {
+        EnrichedInvitationDTO dto = new EnrichedInvitationDTO();
+        dto.setId(collaboration.getId());
+        dto.setProjectId(collaboration.getProjectId());
+        dto.setInviterId(collaboration.getInviterId());
+        dto.setInviteeId(collaboration.getInviteeId());
+        dto.setRole(collaboration.getRole());
+        dto.setStatus(collaboration.getStatus());
+        dto.setInvitedAt(collaboration.getInvitedAt());
+        dto.setRespondedAt(collaboration.getRespondedAt());
+        dto.setExpiresAt(collaboration.getExpiresAt());
+        
+        // Fetch user details
+        UserServiceClient.UserInfo userInfo = userServiceClient.getUserInfo(collaboration.getInviterId());
+        dto.setInviterUsername(userInfo.getUsername());
+        dto.setInviterDisplayName(userInfo.getDisplayName());
+        
+        // Fetch project details
+        ProjectServiceClient.ProjectInfo projectInfo = projectServiceClient.getProjectInfo(collaboration.getProjectId());
+        dto.setProjectName(projectInfo.getName());
+        dto.setProjectDescription(projectInfo.getDescription());
+        
+        return dto;
     }
 
     public List<CollaborationDTO> getSentInvitations(UUID userId) {

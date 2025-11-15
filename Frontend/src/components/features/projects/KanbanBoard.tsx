@@ -4,16 +4,23 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { BoardColumn, Task } from '@/types/project'
 import { TaskCard } from './TaskCard'
 import { Button } from '@/components/common/Button'
+import { ProjectPermissions } from '@/types/collaboration'
 
 interface KanbanBoardProps {
   columns: BoardColumn[]
   onTaskMove: (taskId: string, targetColumnId: string, position: number) => void
   onTaskClick: (task: Task) => void
   onAddTask: (columnId: string) => void
+  permissions: ProjectPermissions
 }
 
-export function KanbanBoard({ columns, onTaskMove, onTaskClick, onAddTask }: KanbanBoardProps) {
+export function KanbanBoard({ columns, onTaskMove, onTaskClick, onAddTask, permissions }: KanbanBoardProps) {
   const handleDragEnd = (result: DropResult) => {
+    // Check if user has write permissions
+    if (!permissions.canWrite) {
+      return
+    }
+
     const { destination, source, draggableId } = result
 
     if (!destination) return
@@ -43,13 +50,15 @@ export function KanbanBoard({ columns, onTaskMove, onTaskClick, onAddTask }: Kan
                   ({column.tasks.length})
                 </span>
               </h3>
-              <Button
-                onClick={() => onAddTask(column.id)}
-                size="sm"
-                variant="secondary"
-              >
-                +
-              </Button>
+              {permissions.canWrite && (
+                <Button
+                  onClick={() => onAddTask(column.id)}
+                  size="sm"
+                  variant="secondary"
+                >
+                  +
+                </Button>
+              )}
             </div>
 
             <Droppable droppableId={column.id}>
@@ -62,15 +71,24 @@ export function KanbanBoard({ columns, onTaskMove, onTaskClick, onAddTask }: Kan
                   }`}
                 >
                   {column.tasks.map((task, index) => (
-                    <Draggable key={task.id} draggableId={task.id} index={index}>
+                    <Draggable 
+                      key={task.id} 
+                      draggableId={task.id} 
+                      index={index}
+                      isDragDisabled={!permissions.canWrite}
+                    >
                       {(provided, snapshot) => (
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          {...provided.dragHandleProps}
+                          {...(permissions.canWrite ? provided.dragHandleProps : {})}
                           className={snapshot.isDragging ? 'opacity-50' : ''}
                         >
-                          <TaskCard task={task} onClick={() => onTaskClick(task)} />
+                          <TaskCard 
+                            task={task} 
+                            onClick={() => onTaskClick(task)}
+                            canEdit={permissions.canWrite}
+                          />
                         </div>
                       )}
                     </Draggable>

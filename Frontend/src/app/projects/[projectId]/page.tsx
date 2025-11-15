@@ -9,7 +9,9 @@ import { Badge } from '@/components/common/Badge'
 import { Button } from '@/components/common/Button'
 import { Navigation, Breadcrumb } from '@/components/common'
 import { KanbanBoard, TaskModal, EditProjectModal, DeleteProjectModal } from '@/components/features/projects'
+import { CollaboratorList, InviteCollaboratorModal } from '@/components/features/collaboration'
 import { useAuthGuard } from '@/hooks/useAuthGuard'
+import { useProjectPermissions } from '@/hooks/useProjectPermissions'
 import { Task, TaskRequest, ProjectRequest } from '@/types/project'
 
 export default function ProjectDetailPage() {
@@ -23,6 +25,7 @@ export default function ProjectDetailPage() {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | undefined>()
   const [selectedColumnId, setSelectedColumnId] = useState<string>('')
 
@@ -31,6 +34,8 @@ export default function ProjectDetailPage() {
     queryFn: () => projectService.getProject(projectId),
     enabled: !!projectId,
   })
+
+  const { permissions, isLoading: permissionsLoading } = useProjectPermissions(projectId)
 
   const createTaskMutation = useMutation({
     mutationFn: (data: TaskRequest) => projectService.createTask(data),
@@ -161,6 +166,7 @@ export default function ProjectDetailPage() {
   }
 
   const handleAddTask = (columnId: string) => {
+    if (!permissions.canWrite) return
     setSelectedTask(undefined)
     setSelectedColumnId(columnId)
     setIsTaskModalOpen(true)
@@ -181,6 +187,8 @@ export default function ProjectDetailPage() {
   }
 
   const handleTaskMove = (taskId: string, targetColumnId: string, position: number) => {
+    if (!permissions.canWrite) return
+    
     // Verify the task exists in the current project data
     const taskExists = project?.columns.some(col => 
       col.tasks.some(task => task.id === taskId)
@@ -254,47 +262,73 @@ export default function ProjectDetailPage() {
             <Badge variant={project.visibility === 'PUBLIC' ? 'success' : 'secondary'}>
               {project.visibility}
             </Badge>
-            <Button
-              onClick={() => setIsEditModalOpen(true)}
-              variant="secondary"
-              size="sm"
-            >
-              <svg
-                className="w-4 h-4 mr-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            {permissions.canWrite && (
+              <Button
+                onClick={() => setIsEditModalOpen(true)}
+                variant="secondary"
+                size="sm"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                />
-              </svg>
-              Edit
-            </Button>
-            <Button
-              onClick={() => setIsDeleteModalOpen(true)}
-              variant="secondary"
-              size="sm"
-              className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-            >
-              <svg
-                className="w-4 h-4 mr-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+                <svg
+                  className="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
+                </svg>
+                Edit
+              </Button>
+            )}
+            {permissions.canWrite && (
+              <Button
+                onClick={() => setIsInviteModalOpen(true)}
+                variant="primary"
+                size="sm"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                />
-              </svg>
-              Delete
-            </Button>
+                <svg
+                  className="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                  />
+                </svg>
+                Invite
+              </Button>
+            )}
+            {permissions.canDelete && (
+              <Button
+                onClick={() => setIsDeleteModalOpen(true)}
+                variant="secondary"
+                size="sm"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+              >
+                <svg
+                  className="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+                Delete
+              </Button>
+            )}
           </div>
         </div>
 
@@ -350,6 +384,11 @@ export default function ProjectDetailPage() {
         )}
       </div>
 
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Collaborators</h2>
+        <CollaboratorList projectId={projectId} />
+      </div>
+
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 overflow-x-auto">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Project Board</h2>
         {project.columns && project.columns.length > 0 ? (
@@ -359,6 +398,7 @@ export default function ProjectDetailPage() {
               onTaskMove={handleTaskMove}
               onTaskClick={handleTaskClick}
               onAddTask={handleAddTask}
+              permissions={permissions}
             />
           </div>
         ) : (
@@ -388,6 +428,12 @@ export default function ProjectDetailPage() {
         onConfirm={handleDeleteProject}
         projectName={project.name}
         isDeleting={deleteProjectMutation.isPending}
+      />
+
+      <InviteCollaboratorModal
+        isOpen={isInviteModalOpen}
+        onClose={() => setIsInviteModalOpen(false)}
+        projectId={projectId}
       />
       </div>
     </div>

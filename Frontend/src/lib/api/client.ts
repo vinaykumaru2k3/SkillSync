@@ -34,6 +34,10 @@ class ApiClient {
             method: config.method?.toUpperCase(),
             url: config.url,
             data: config.data,
+            headers: {
+              'Authorization': config.headers.Authorization ? 'Bearer ***' : undefined,
+              'X-User-Id': config.headers['X-User-Id']
+            }
           })
         }
 
@@ -60,15 +64,20 @@ class ApiClient {
         return response
       },
       async (error: AxiosError) => {
-        // Log error in development
+        // Log error in development (but suppress 404 for profile endpoints)
         if (process.env.NODE_ENV === 'development') {
-          console.error('[API Response Error]', {
-            status: error.response?.status,
-            url: error.config?.url,
-            message: error.message,
-            data: error.response?.data,
-            fullError: error,
-          })
+          const isProfileNotFound = error.response?.status === 404 && 
+            error.config?.url?.includes('/users/user/')
+          
+          if (!isProfileNotFound) {
+            console.error('[API Response Error]', {
+              status: error.response?.status,
+              url: error.config?.url,
+              message: error.message,
+              data: error.response?.data,
+              fullError: error,
+            })
+          }
         }
 
         // Handle 401 Unauthorized - token expired (but not during logout)
@@ -86,6 +95,18 @@ class ApiClient {
   private getAuthToken(): string | null {
     if (typeof window === 'undefined') return null
     return localStorage.getItem('auth_token')
+  }
+
+  private getUserIdFromToken(token: string): string | null {
+    try {
+      // Decode JWT token (just the payload, no verification needed on client)
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      const userId = payload.userId || payload.user_id || payload.sub || null
+      return userId
+    } catch (error) {
+      console.error('Failed to decode JWT token:', error)
+      return null
+    }
   }
 
   private async handleUnauthorized() {

@@ -14,6 +14,10 @@ public class CreateUserProfileRequest {
     @NotNull(message = "User ID is required")
     private UUID userId;
 
+    @NotBlank(message = "Username is required")
+    @Size(min = 3, max = 30, message = "Username must be between 3 and 30 characters")
+    private String username;
+
     @NotBlank(message = "Display name is required")
     @Size(max = 100, message = "Display name must not exceed 100 characters")
     private String displayName;
@@ -37,6 +41,14 @@ public class CreateUserProfileRequest {
 
     public void setUserId(UUID userId) {
         this.userId = userId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getDisplayName() {

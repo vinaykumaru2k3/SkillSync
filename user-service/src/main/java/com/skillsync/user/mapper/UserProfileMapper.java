@@ -19,6 +19,7 @@ public class UserProfileMapper {
         UserProfileDto dto = new UserProfileDto();
         dto.setId(entity.getId());
         dto.setUserId(entity.getUserId());
+        dto.setUsername(entity.getUsername());
         dto.setDisplayName(entity.getDisplayName());
         dto.setBio(entity.getBio());
         dto.setLocation(entity.getLocation());

@@ -2,9 +2,8 @@
 
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
-import { userService } from '@/lib/api/services/userService'
+import { useUserProfile } from '@/hooks/useUserProfile'
 import { Button } from './Button'
 import { ThemeToggle } from './ThemeToggle'
 
@@ -12,16 +11,7 @@ export function Navigation() {
   const { user, logout } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
-
-  // Check if user has a profile
-  const { data: userProfile } = useQuery({
-    queryKey: ['userProfile', user?.userId],
-    queryFn: () => userService.getProfileByUserId(user!.userId),
-    enabled: !!user?.userId,
-    retry: false,
-  })
-
-  const hasProfile = !!userProfile
+  const { profile: userProfile, hasProfile } = useUserProfile()
 
   const handleLogout = async () => {
     await logout()

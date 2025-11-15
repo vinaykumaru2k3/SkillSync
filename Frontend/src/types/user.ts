@@ -20,6 +20,7 @@ export interface SkillCard {
 export interface UserProfile {
   id: string
   userId: string
+  username: string
   displayName: string
   bio?: string
   location?: string
@@ -34,6 +35,7 @@ export interface UserProfile {
 
 export interface CreateUserProfileRequest {
   userId: string
+  username: string
   displayName: string
   bio?: string
   location?: string
@@ -43,6 +45,7 @@ export interface CreateUserProfileRequest {
 }
 
 export interface UpdateUserProfileRequest {
+  username?: string
   displayName?: string
   bio?: string
   location?: string

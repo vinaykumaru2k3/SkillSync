@@ -22,6 +22,10 @@ export const projectService = {
     return apiClient.get<Project[]>(`/projects/owner/${ownerId}`)
   },
 
+  getMyProjects: async (): Promise<Project[]> => {
+    return apiClient.get<Project[]>('/projects/my-projects')
+  },
+
   getAllPublicProjects: async (): Promise<Project[]> => {
     return apiClient.get<Project[]>('/projects/public')
   },
@@ -55,6 +59,10 @@ export const projectService = {
 
   discoverProjects: async (): Promise<Project[]> => {
     return apiClient.get<Project[]>('/projects/discover')
+  },
+
+  getAllProjects: async (): Promise<Project[]> => {
+    return apiClient.get<Project[]>('/projects/public')
   },
 
   // Task operations

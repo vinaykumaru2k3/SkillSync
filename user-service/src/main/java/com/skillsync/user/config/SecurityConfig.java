@@ -23,6 +23,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) // Disable CSRF for API
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints - allow viewing public profiles
+                .requestMatchers("/api/v1/users").permitAll() // Allow profile creation
                 .requestMatchers("/api/v1/users/search/**").permitAll() // Allow public search
                 .requestMatchers("/api/v1/users/*/public").permitAll() // Allow viewing public profiles
                 .requestMatchers("/api/v1/users/{id}").permitAll() // Allow viewing profiles by ID
