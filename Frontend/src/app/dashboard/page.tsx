@@ -103,11 +103,31 @@ export default function DashboardPage() {
               </div>
             </Card>
 
-            {/* Account Info Card */}
-            <Card>
+            {/* Collaborations Card */}
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push('/collaborations')}>
               <div className="flex items-start gap-4">
                 <div className="rounded-lg bg-purple-100 p-3 dark:bg-purple-900">
                   <svg className="h-6 w-6 text-purple-600 dark:text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Collaborations</h3>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                    View pending invitations and manage project collaborations
+                  </p>
+                  <Button variant="outline" size="sm" className="mt-4">
+                    View Invitations →
+                  </Button>
+                </div>
+              </div>
+            </Card>
+
+            {/* Account Info Card */}
+            <Card>
+              <div className="flex items-start gap-4">
+                <div className="rounded-lg bg-orange-100 p-3 dark:bg-orange-900">
+                  <svg className="h-6 w-6 text-orange-600 dark:text-orange-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>

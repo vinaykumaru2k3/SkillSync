@@ -79,6 +79,9 @@ export function Navigation() {
               <Link href="/projects" className={getLinkClass('/projects')}>
                 Projects
               </Link>
+              <Link href="/collaborations" className={getLinkClass('/collaborations')}>
+                Collaborations
+              </Link>
               <Link href="/profile/github" className={getLinkClass('/profile/github')}>
                 GitHub
               </Link>

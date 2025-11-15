@@ -89,7 +89,6 @@ public class GatewayConfig {
                 .route("collaboration-service", r -> r
                         .path("/api/v1/collaborations/**")
                         .filters(f -> f
-                                .stripPrefix(2)
                                 .filter(new SecurityHeadersFilter())
                                 .requestRateLimiter(config -> config
                                         .setRateLimiter(redisRateLimiter)

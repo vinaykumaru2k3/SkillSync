@@ -1,4 +1,4 @@
-package com.skillsync.user.config;
+package com.skillsync.collaboration.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,7 +10,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -19,17 +18,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.disable()) // Disable CORS - API Gateway handles it
-            .csrf(csrf -> csrf.disable()) // Disable CSRF for API
+            .cors(cors -> cors.disable()) // API Gateway handles CORS
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints - allow viewing public profiles
-                .requestMatchers("/api/v1/users/search/**").permitAll() // Allow public search
-                .requestMatchers("/api/v1/users/*/public").permitAll() // Allow viewing public profiles
-                .requestMatchers("/api/v1/users/{id}").permitAll() // Allow viewing profiles by ID
-                .requestMatchers("/api/v1/users/user/**").permitAll() // Allow viewing profiles by userId
-                .requestMatchers("/actuator/**").permitAll() // Allow actuator endpoints
-                // All other endpoints require authentication
-                .anyRequest().authenticated()
+                .anyRequest().permitAll() // Trust the API Gateway for authentication
             );
 
         return http.build();
