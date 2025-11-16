@@ -104,7 +104,6 @@ public class GatewayConfig {
                 .route("feedback-service", r -> r
                         .path("/api/v1/feedback/**")
                         .filters(f -> f
-                                .stripPrefix(2)
                                 .filter(new SecurityHeadersFilter())
                                 .requestRateLimiter(config -> config
                                         .setRateLimiter(redisRateLimiter)

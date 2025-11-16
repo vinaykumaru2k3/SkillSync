@@ -10,10 +10,12 @@ import { Button } from '@/components/common/Button'
 import { Navigation, Breadcrumb } from '@/components/common'
 import { KanbanBoard, TaskModal, EditProjectModal, DeleteProjectModal } from '@/components/features/projects'
 import { CollaboratorList, InviteCollaboratorModal } from '@/components/features/collaboration'
+import { ProjectFeedback } from '@/components/features/feedback'
 import { useAuthGuard } from '@/hooks/useAuthGuard'
 import { useProjectPermissions } from '@/hooks/useProjectPermissions'
 import { Task, TaskRequest, ProjectRequest } from '@/types/project'
 import { useToast } from '@/contexts/ToastContext'
+import { getTechIcon } from '@/lib/utils/techIcons'
 
 export default function ProjectDetailPage() {
   useAuthGuard()
@@ -244,17 +246,6 @@ export default function ProjectDetailPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navigation />
       <div className="w-full px-4 py-8 max-w-[1920px] mx-auto">
-        <div className="flex items-center gap-4 mb-4">
-          <button
-            onClick={() => router.push('/projects')}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Projects
-          </button>
-        </div>
         <Breadcrumb
           items={[
             { label: 'Projects', href: '/projects' },
@@ -374,6 +365,7 @@ export default function ProjectDetailPage() {
             <div className="flex flex-wrap gap-2">
               {project.technologies.map((tech) => (
                 <Badge key={tech} variant="primary">
+                  <span className="mr-1">{getTechIcon(tech)}</span>
                   {tech}
                 </Badge>
               ))}
@@ -401,6 +393,11 @@ export default function ProjectDetailPage() {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Collaborators</h2>
         <CollaboratorList projectId={projectId} isOwner={permissions.canDelete} ownerId={project.ownerId} />
+      </div>
+
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Feedback & Reviews</h2>
+        <ProjectFeedback projectId={projectId} isOwner={permissions.canDelete} />
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 overflow-x-auto">
