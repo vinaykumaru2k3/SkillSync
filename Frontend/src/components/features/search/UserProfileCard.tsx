@@ -9,6 +9,7 @@ import { Button } from '@/components/common/Button'
 import { InviteCollaboratorModal } from '@/components/features/collaboration'
 import { useQuery } from '@tanstack/react-query'
 import { projectService } from '@/lib/api/services'
+import { useToast } from '@/contexts/ToastContext'
 
 interface UserProfileCardProps {
   profile: UserProfile
@@ -18,14 +19,18 @@ export function UserProfileCard({ profile }: UserProfileCardProps) {
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
   const [showProjectMenu, setShowProjectMenu] = useState(false)
+  const { showToast } = useToast()
 
   // Fetch user's projects for the invite dropdown
-  const { data: projects, error: projectsError, isError } = useQuery({
+  const { data: projectsData, error: projectsError, isError } = useQuery({
     queryKey: ['projects'],
     queryFn: () => projectService.getMyProjects(),
     retry: false,
     throwOnError: false,
   })
+
+  // Combine owned and collaborated projects
+  const projects = projectsData ? [...projectsData.owned, ...projectsData.collaborated] : []
 
   const handleInviteClick = (e: React.MouseEvent, projectId: string) => {
     try {
@@ -130,7 +135,7 @@ export function UserProfileCard({ profile }: UserProfileCardProps) {
           </Button>
 
           {/* Project Selection Dropdown */}
-          {showProjectMenu && projects && projects.length > 0 && (
+          {showProjectMenu && projects.length > 0 && (
             <div className="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto z-10">
               {projects.map((project) => (
                 <button
@@ -152,7 +157,7 @@ export function UserProfileCard({ profile }: UserProfileCardProps) {
             </div>
           )}
 
-          {showProjectMenu && !isError && (!projects || projects.length === 0) && (
+          {showProjectMenu && !isError && projects.length === 0 && (
             <div className="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 z-10">
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 You don't have any projects yet. Create a project first to invite collaborators.
@@ -171,8 +176,7 @@ export function UserProfileCard({ profile }: UserProfileCardProps) {
             setSelectedProjectId(null)
           }}
           onSuccess={() => {
-            // Optional: Show success message
-            alert(`Invitation sent to @${profile.username}!`)
+            showToast(`Invitation sent to @${profile.username}!`, 'success')
           }}
           preSelectedUser={{
             userId: profile.userId,

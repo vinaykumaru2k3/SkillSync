@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react'
 import { collaborationApi } from '@/lib/api/collaboration'
 import { Collaboration, CollaborationRole } from '@/types/collaboration'
+import { useToast } from '@/contexts/ToastContext'
 
 export default function PendingInvitations() {
   const [invitations, setInvitations] = useState<Collaboration[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [processingId, setProcessingId] = useState<string | null>(null)
+  const { showToast } = useToast()
 
   useEffect(() => {
     loadInvitations()
@@ -31,9 +33,10 @@ export default function PendingInvitations() {
     try {
       setProcessingId(invitationId)
       await collaborationApi.acceptInvitation(invitationId)
+      showToast('Invitation accepted successfully', 'success')
       loadInvitations()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to accept invitation')
+      showToast(err instanceof Error ? err.message : 'Failed to accept invitation', 'error')
     } finally {
       setProcessingId(null)
     }
@@ -43,9 +46,10 @@ export default function PendingInvitations() {
     try {
       setProcessingId(invitationId)
       await collaborationApi.declineInvitation(invitationId)
+      showToast('Invitation declined', 'info')
       loadInvitations()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to decline invitation')
+      showToast(err instanceof Error ? err.message : 'Failed to decline invitation', 'error')
     } finally {
       setProcessingId(null)
     }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { collaborationApi } from '@/lib/api/collaboration'
 import { Collaboration, CollaborationRole, CollaborationStatus } from '@/types/collaboration'
+import { useToast } from '@/contexts/ToastContext'
 
 interface CollaboratorListProps {
   projectId: string
@@ -15,6 +16,7 @@ export default function CollaboratorList({ projectId, isOwner, ownerId, onRefres
   const [collaborators, setCollaborators] = useState<Collaboration[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { showToast } = useToast()
 
   useEffect(() => {
     loadCollaborators()
@@ -40,9 +42,10 @@ export default function CollaboratorList({ projectId, isOwner, ownerId, onRefres
 
     try {
       await collaborationApi.revokeCollaboration(collaborationId)
+      showToast('Collaborator removed successfully', 'success')
       loadCollaborators()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to revoke collaboration')
+      showToast(err instanceof Error ? err.message : 'Failed to revoke collaboration', 'error')
     }
   }
 

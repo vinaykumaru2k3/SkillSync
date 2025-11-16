@@ -8,11 +8,11 @@ import { ProtectedRoute } from '@/components/auth'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/common/Button'
 import { Spinner } from '@/components/common/Spinner'
+import { Navigation } from '@/components/common/Navigation'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { userService } from '@/lib/api/services/userService'
 import { Visibility } from '@/types/user'
-import { useToast } from '@/hooks/useToast'
+import { useToast } from '@/contexts/ToastContext'
 
 export default function ProfilePage({ params }: { params: Promise<{ userId: string }> }) {
   const { userId } = use(params)
@@ -37,6 +37,8 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
   })
 
   // Create profile mutation
+  const { showToast } = useToast()
+
   const createProfileMutation = useMutation({
     mutationFn: (data: any) => userService.createProfile({
       userId: user!.userId,
@@ -55,44 +57,23 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
     },
   })
 
-  const handleLogout = async () => {
-    await logout()
-    window.location.href = '/'
-  }
-
   return (
     <ProtectedRoute>
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <nav className="border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-800">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center gap-8">
-              <Link href="/dashboard">
-                <h1 className="text-xl font-bold cursor-pointer hover:text-blue-600">SkillSync</h1>
-              </Link>
-              <div className="hidden md:flex gap-6">
-                <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-                  Dashboard
-                </Link>
-                <Link href={`/profile/${user?.userId}`} className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-                  My Profile
-                </Link>
-                <Link href="/search" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-                  Discover
-                </Link>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600 dark:text-gray-400">{user?.email}</span>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
-                Logout
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
       <main className="container mx-auto px-4 py-8">
+        {!isOwnProfile && (
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors mb-4"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
+          </button>
+        )}
         {isLoading ? (
           <div className="flex justify-center py-12">
             <Spinner size="lg" />

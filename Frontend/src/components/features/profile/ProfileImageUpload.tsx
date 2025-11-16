@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { Button } from '@/components/common/Button'
 import { storageService } from '@/lib/supabase/storage'
 import { ImageCropper } from './ImageCropper'
+import { useToast } from '@/contexts/ToastContext'
 
 interface ProfileImageUploadProps {
   currentImageUrl?: string
@@ -15,6 +16,7 @@ export function ProfileImageUpload({ currentImageUrl, onUpload }: ProfileImageUp
   const [uploading, setUploading] = useState(false)
   const [imageToCrop, setImageToCrop] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { showToast } = useToast()
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -31,7 +33,7 @@ export function ProfileImageUpload({ currentImageUrl, onUpload }: ProfileImageUp
       }
       reader.readAsDataURL(file)
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Invalid file')
+      showToast(error instanceof Error ? error.message : 'Invalid file', 'error')
     }
   }
 
@@ -62,10 +64,10 @@ export function ProfileImageUpload({ currentImageUrl, onUpload }: ProfileImageUp
       
       // Update profile with new image URL
       await onUpload(imageUrl)
-      alert('Profile picture updated successfully!')
+      showToast('Profile picture updated successfully!', 'success')
     } catch (error) {
       console.error('Upload failed:', error)
-      alert(error instanceof Error ? error.message : 'Failed to upload image. Please try again.')
+      showToast(error instanceof Error ? error.message : 'Failed to upload image. Please try again.', 'error')
       setPreview(currentImageUrl || null)
     } finally {
       setUploading(false)

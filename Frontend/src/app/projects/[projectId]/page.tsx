@@ -13,6 +13,7 @@ import { CollaboratorList, InviteCollaboratorModal } from '@/components/features
 import { useAuthGuard } from '@/hooks/useAuthGuard'
 import { useProjectPermissions } from '@/hooks/useProjectPermissions'
 import { Task, TaskRequest, ProjectRequest } from '@/types/project'
+import { useToast } from '@/contexts/ToastContext'
 
 export default function ProjectDetailPage() {
   useAuthGuard()
@@ -36,6 +37,7 @@ export default function ProjectDetailPage() {
   })
 
   const { permissions, isLoading: permissionsLoading } = useProjectPermissions(projectId)
+  const { showToast } = useToast()
 
   const createTaskMutation = useMutation({
     mutationFn: (data: TaskRequest) => projectService.createTask(data),
@@ -48,7 +50,7 @@ export default function ProjectDetailPage() {
     },
     onError: (error) => {
       console.error('Failed to create task:', error)
-      alert('Failed to create task. Please try again.')
+      showToast('Failed to create task. Please try again.', 'error')
     },
   })
 
@@ -63,7 +65,7 @@ export default function ProjectDetailPage() {
     },
     onError: (error) => {
       console.error('Failed to update task:', error)
-      alert('Failed to update task. Please try again.')
+      showToast('Failed to update task. Please try again.', 'error')
     },
   })
 
@@ -113,6 +115,7 @@ export default function ProjectDetailPage() {
     },
     onError: (error, variables, context) => {
       console.error('Failed to move task:', error)
+      showToast('Failed to move task. Please try again.', 'error')
       // Rollback to previous state and refetch
       if (context?.previousProject) {
         queryClient.setQueryData(['project', projectId], context.previousProject)
@@ -132,7 +135,7 @@ export default function ProjectDetailPage() {
     },
     onError: (error) => {
       console.error('Failed to delete task:', error)
-      alert('Failed to delete task. Please try again.')
+      showToast('Failed to delete task. Please try again.', 'error')
     },
   })
 
@@ -144,7 +147,7 @@ export default function ProjectDetailPage() {
     },
     onError: (error) => {
       console.error('Failed to update project:', error)
-      alert('Failed to update project. Please try again.')
+      showToast('Failed to update project. Please try again.', 'error')
     },
   })
 
@@ -155,7 +158,7 @@ export default function ProjectDetailPage() {
     },
     onError: (error) => {
       console.error('Failed to delete project:', error)
-      alert('Failed to delete project. Please try again.')
+      showToast('Failed to delete project. Please try again.', 'error')
     },
   })
 
@@ -196,7 +199,7 @@ export default function ProjectDetailPage() {
     
     if (!taskExists) {
       console.error('Task not found in current project data:', taskId)
-      alert('Task not found. Please refresh the page.')
+      showToast('Task not found. Please refresh the page.', 'error')
       return
     }
     
@@ -241,6 +244,17 @@ export default function ProjectDetailPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navigation />
       <div className="w-full px-4 py-8 max-w-[1920px] mx-auto">
+        <div className="flex items-center gap-4 mb-4">
+          <button
+            onClick={() => router.push('/projects')}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Projects
+          </button>
+        </div>
         <Breadcrumb
           items={[
             { label: 'Projects', href: '/projects' },
