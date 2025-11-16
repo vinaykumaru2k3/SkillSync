@@ -64,12 +64,14 @@ class ApiClient {
         return response
       },
       async (error: AxiosError) => {
-        // Log error in development (but suppress 404 for profile endpoints)
+        // Log error in development (but suppress certain expected errors)
         if (process.env.NODE_ENV === 'development') {
           const isProfileNotFound = error.response?.status === 404 && 
             error.config?.url?.includes('/users/user/')
+          const isGitHubStatsUnavailable = (error.response?.status === 403 || error.response?.status === 404) &&
+            error.config?.url?.includes('/github/')
           
-          if (!isProfileNotFound) {
+          if (!isProfileNotFound && !isGitHubStatsUnavailable) {
             console.error('[API Response Error]', {
               status: error.response?.status,
               url: error.config?.url,

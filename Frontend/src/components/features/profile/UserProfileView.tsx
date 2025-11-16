@@ -12,6 +12,7 @@ import { ProfileForm } from './ProfileForm'
 import { ProfileImageUpload } from './ProfileImageUpload'
 import { SkillCardItem } from './SkillCardItem'
 import { SkillCardForm } from './SkillCardForm'
+import { GitHubStatsCard } from './GitHubStatsCard'
 import { useToast } from '@/hooks/useToast'
 
 interface UserProfileViewProps {
@@ -274,6 +275,9 @@ export function UserProfileView({ userId, editable = false }: UserProfileViewPro
           </div>
         )}
       </Card>
+
+      {/* GitHub Statistics */}
+      <GitHubStatsCard userId={userId} />
 
       {/* Edit Profile Modal */}
       <Modal

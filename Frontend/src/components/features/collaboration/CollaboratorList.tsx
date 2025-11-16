@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { collaborationApi } from '@/lib/api/collaboration'
 import { Collaboration, CollaborationRole, CollaborationStatus } from '@/types/collaboration'
 import { useToast } from '@/contexts/ToastContext'
+import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 
 interface CollaboratorListProps {
   projectId: string
@@ -16,6 +17,7 @@ export default function CollaboratorList({ projectId, isOwner, ownerId, onRefres
   const [collaborators, setCollaborators] = useState<Collaboration[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; collaborationId: string; displayName: string }>({ isOpen: false, collaborationId: '', displayName: '' })
   const { showToast } = useToast()
 
   useEffect(() => {
@@ -35,13 +37,13 @@ export default function CollaboratorList({ projectId, isOwner, ownerId, onRefres
     }
   }
 
-  const handleRevoke = async (collaborationId: string) => {
-    if (!confirm('Are you sure you want to revoke this collaboration?')) {
-      return
-    }
+  const handleRevokeClick = (collaborationId: string, displayName: string) => {
+    setConfirmDialog({ isOpen: true, collaborationId, displayName })
+  }
 
+  const handleRevokeConfirm = async () => {
     try {
-      await collaborationApi.revokeCollaboration(collaborationId)
+      await collaborationApi.revokeCollaboration(confirmDialog.collaborationId)
       showToast('Collaborator removed successfully', 'success')
       loadCollaborators()
     } catch (err) {
@@ -144,7 +146,7 @@ export default function CollaboratorList({ projectId, isOwner, ownerId, onRefres
 
           {isOwner && (
             <button
-              onClick={() => handleRevoke(collab.id)}
+              onClick={() => handleRevokeClick(collab.id, (collab as any).inviteeDisplayName || 'this user')}
               className="ml-4 px-3 py-1 text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
             >
               Revoke
@@ -152,6 +154,16 @@ export default function CollaboratorList({ projectId, isOwner, ownerId, onRefres
           )}
         </div>
       ))}
+
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog({ isOpen: false, collaborationId: '', displayName: '' })}
+        onConfirm={handleRevokeConfirm}
+        title="Remove Collaborator"
+        message={`Are you sure you want to remove ${confirmDialog.displayName} from this project? This action cannot be undone.`}
+        confirmText="Remove"
+        variant="danger"
+      />
     </div>
   )
 }

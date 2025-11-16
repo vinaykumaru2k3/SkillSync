@@ -445,6 +445,7 @@ export default function ProjectDetailPage() {
         isOpen={isInviteModalOpen}
         onClose={() => setIsInviteModalOpen(false)}
         projectId={projectId}
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: ['project', projectId] })}
       />
       </div>
     </div>

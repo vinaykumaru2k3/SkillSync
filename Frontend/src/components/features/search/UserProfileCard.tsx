@@ -7,6 +7,7 @@ import { Card } from '@/components/common/Card'
 import { Badge } from '@/components/common/Badge'
 import { Button } from '@/components/common/Button'
 import { InviteCollaboratorModal } from '@/components/features/collaboration'
+import { UserGitHubStats } from './UserGitHubStats'
 import { useQuery } from '@tanstack/react-query'
 import { projectService } from '@/lib/api/services'
 import { useToast } from '@/contexts/ToastContext'
@@ -118,6 +119,8 @@ export function UserProfileCard({ profile }: UserProfileCardProps) {
             )}
           </div>
         </div>
+
+        <UserGitHubStats userId={profile.userId} />
         </Link>
 
         {/* Invite Button */}

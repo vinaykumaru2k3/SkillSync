@@ -40,9 +40,11 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         "/api/v1/projects/public",
         "/api/v1/projects/discover",
         "/api/v1/projects/search",
-        "/api/v1/users/user/",  // Allow viewing user profiles by userId
-        "/api/v1/users/search",  // Allow searching users
-        "/api/v1/feedback/project/"  // Allow viewing project feedback and ratings
+        "/api/v1/users/user/",
+        "/api/v1/users/search",
+        "/api/v1/feedback/project/",
+        "/api/v1/github/stats/",
+        "/api/v1/github/activity/summary"
     );
     
     @Override

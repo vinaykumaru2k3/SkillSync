@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { collaborationApi } from '@/lib/api/collaboration'
 import { CollaborationRole } from '@/types/collaboration'
+import { apiClient } from '@/lib/api/client'
+import { useToast } from '@/contexts/ToastContext'
 
 interface InviteCollaboratorModalProps {
   projectId: string
@@ -27,6 +29,7 @@ export default function InviteCollaboratorModal({
   const [role, setRole] = useState<CollaborationRole>(CollaborationRole.VIEWER)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { showToast } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,32 +43,11 @@ export default function InviteCollaboratorModal({
         // Use pre-selected user
         inviteeId = preSelectedUser.userId
       } else {
-        // Look up user by username
-        const response = await fetch(`http://localhost:8080/api/v1/users/username/${username}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          }
-        })
-        
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error('User not found')
-          }
-          if (response.status === 401) {
-            throw new Error('Authentication failed')
-          }
-          if (response.status >= 500) {
-            throw new Error('Server error. Please try again later')
-          }
-          throw new Error(`Failed to find user (${response.status})`)
-        }
-        
-        const apiResponse = await response.json()
-        const userProfile = apiResponse.data || apiResponse
+        // Look up user by username using apiClient
+        const userProfile = await apiClient.get<any>(`/users/username/${username}`)
         
         if (!userProfile?.userId) {
-          throw new Error('Invalid user data received')
+          throw new Error('User not found')
         }
         
         inviteeId = userProfile.userId
@@ -77,12 +59,15 @@ export default function InviteCollaboratorModal({
         role,
       })
 
+      showToast('Invitation sent successfully', 'success')
       setUsername('')
       setRole(CollaborationRole.VIEWER)
       onSuccess()
       onClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send invitation')
+      const errorMessage = err instanceof Error ? err.message : 'Failed to send invitation'
+      setError(errorMessage)
+      showToast(errorMessage, 'error')
     } finally {
       setIsLoading(false)
     }
