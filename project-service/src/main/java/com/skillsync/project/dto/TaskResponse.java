@@ -19,6 +19,9 @@ public class TaskResponse {
     private String title;
     private String description;
     private UUID assigneeId;
+    private UUID creatorId;
+    private String creatorUsername;
+    private String creatorProfileImageUrl;
     private Set<String> labels;
     private Task.TaskPriority priority;
     private Task.TaskStatus status;

@@ -386,7 +386,7 @@ export default function ProjectDetailPage() {
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Collaborators</h2>
-        <CollaboratorList projectId={projectId} />
+        <CollaboratorList projectId={projectId} isOwner={permissions.canDelete} ownerId={project.ownerId} />
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 overflow-x-auto">

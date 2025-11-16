@@ -9,11 +9,14 @@ import java.util.UUID;
 class UserProfileDto {
     private String displayName;
     private String username;
+    private String profileImageUrl;
     
     public String getDisplayName() { return displayName; }
     public void setDisplayName(String displayName) { this.displayName = displayName; }
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
+    public String getProfileImageUrl() { return profileImageUrl; }
+    public void setProfileImageUrl(String profileImageUrl) { this.profileImageUrl = profileImageUrl; }
 }
 
 @Component
@@ -35,28 +38,32 @@ public class UserServiceClient {
                 UserProfileDto.class
             );
             if (profile != null) {
-                return new UserInfo(profile.getDisplayName(), profile.getUsername());
+                return new UserInfo(profile.getDisplayName(), profile.getUsername(), profile.getProfileImageUrl());
             }
         } catch (Exception e) {
             System.err.println("Failed to fetch user info for " + userId + ": " + e.getMessage());
         }
-        return new UserInfo("Unknown User", "unknown_user");
+        return new UserInfo("Unknown User", "unknown_user", null);
     }
 
     public static class UserInfo {
         private String displayName;
         private String username;
+        private String profileImageUrl;
 
         public UserInfo() {}
 
-        public UserInfo(String displayName, String username) {
+        public UserInfo(String displayName, String username, String profileImageUrl) {
             this.displayName = displayName;
             this.username = username;
+            this.profileImageUrl = profileImageUrl;
         }
 
         public String getDisplayName() { return displayName; }
         public void setDisplayName(String displayName) { this.displayName = displayName; }
         public String getUsername() { return username; }
         public void setUsername(String username) { this.username = username; }
+        public String getProfileImageUrl() { return profileImageUrl; }
+        public void setProfileImageUrl(String profileImageUrl) { this.profileImageUrl = profileImageUrl; }
     }
 }

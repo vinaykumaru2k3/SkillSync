@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -46,10 +47,10 @@ public class ProjectController {
     }
     
     @GetMapping("/my-projects")
-    public ResponseEntity<List<ProjectResponse>> getMyProjects(
+    public ResponseEntity<Map<String, List<ProjectResponse>>> getMyProjects(
             @RequestHeader(value = "X-User-Id") UUID userId) {
         log.info("Fetching projects for current user: {}", userId);
-        List<ProjectResponse> projects = projectService.getProjectsByOwner(userId);
+        Map<String, List<ProjectResponse>> projects = projectService.getMyProjects(userId);
         return ResponseEntity.ok(projects);
     }
     

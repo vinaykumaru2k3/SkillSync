@@ -3,9 +3,11 @@ package com.skillsync.collaboration.service;
 import com.skillsync.collaboration.client.ProjectServiceClient;
 import com.skillsync.collaboration.client.UserServiceClient;
 import com.skillsync.collaboration.dto.CollaborationDTO;
+import com.skillsync.collaboration.dto.EnrichedCollaboratorDTO;
 import com.skillsync.collaboration.dto.EnrichedInvitationDTO;
 import com.skillsync.collaboration.dto.InvitationRequest;
 import com.skillsync.collaboration.entity.Collaboration;
+import com.skillsync.collaboration.entity.CollaborationRole;
 import com.skillsync.collaboration.entity.CollaborationStatus;
 import com.skillsync.collaboration.entity.Permission;
 import com.skillsync.collaboration.exception.CollaborationException;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -109,6 +112,7 @@ public class CollaborationService {
         }
 
         collaboration.setStatus(CollaborationStatus.ACCEPTED);
+        collaboration.setRespondedAt(Instant.now());
         Collaboration saved = collaborationRepository.save(collaboration);
 
         // Publish invitation accepted event
@@ -252,6 +256,77 @@ public class CollaborationService {
                 projectId, userId, CollaborationStatus.ACCEPTED)
                 .map(collab -> collab.hasPermission(permission))
                 .orElse(false);
+    }
+
+    public boolean isProjectOwner(UUID projectId, UUID userId) {
+        ProjectServiceClient.ProjectInfo projectInfo = projectServiceClient.getProjectInfo(projectId);
+        return projectInfo.getOwnerId().equals(userId);
+    }
+
+    public List<UUID> getUserCollaboratedProjectIds(UUID userId) {
+        logger.debug("Fetching collaborated project IDs for user {}", userId);
+        
+        List<Collaboration> collaborations = collaborationRepository
+                .findByInviteeIdAndStatus(userId, CollaborationStatus.ACCEPTED);
+        
+        return collaborations.stream()
+                .map(Collaboration::getProjectId)
+                .collect(Collectors.toList());
+    }
+
+    public List<EnrichedCollaboratorDTO> getEnrichedProjectCollaborators(UUID projectId, UUID ownerId) {
+        logger.debug("Fetching enriched collaborators for project {}", projectId);
+        
+        List<EnrichedCollaboratorDTO> result = new ArrayList<>();
+        
+        // Add project owner first if provided
+        if (ownerId != null) {
+            EnrichedCollaboratorDTO ownerDto = new EnrichedCollaboratorDTO();
+            ownerDto.setProjectId(projectId);
+            ownerDto.setInviteeId(ownerId);
+            ownerDto.setRole(CollaborationRole.EDITOR); // Owner has full access
+            ownerDto.setStatus(CollaborationStatus.ACCEPTED);
+            
+            UserServiceClient.UserInfo ownerInfo = userServiceClient.getUserInfo(ownerId);
+            ownerDto.setInviteeUsername(ownerInfo.getUsername());
+            ownerDto.setInviteeDisplayName(ownerInfo.getDisplayName());
+            ownerDto.setInviteeProfileImageUrl(ownerInfo.getProfileImageUrl());
+            
+            result.add(ownerDto);
+        }
+        
+        // Add collaborators
+        List<Collaboration> collaborations = collaborationRepository
+                .findByProjectIdAndStatus(projectId, CollaborationStatus.ACCEPTED);
+        
+        List<EnrichedCollaboratorDTO> collaboratorDtos = collaborations.stream()
+                .map(this::enrichCollaborator)
+                .collect(Collectors.toList());
+        
+        result.addAll(collaboratorDtos);
+        
+        return result;
+    }
+
+    private EnrichedCollaboratorDTO enrichCollaborator(Collaboration collaboration) {
+        EnrichedCollaboratorDTO dto = new EnrichedCollaboratorDTO();
+        dto.setId(collaboration.getId());
+        dto.setProjectId(collaboration.getProjectId());
+        dto.setInviterId(collaboration.getInviterId());
+        dto.setInviteeId(collaboration.getInviteeId());
+        dto.setRole(collaboration.getRole());
+        dto.setStatus(collaboration.getStatus());
+        dto.setInvitedAt(collaboration.getInvitedAt());
+        dto.setRespondedAt(collaboration.getRespondedAt());
+        dto.setCreatedAt(collaboration.getCreatedAt());
+        
+        // Fetch invitee user details
+        UserServiceClient.UserInfo userInfo = userServiceClient.getUserInfo(collaboration.getInviteeId());
+        dto.setInviteeUsername(userInfo.getUsername());
+        dto.setInviteeDisplayName(userInfo.getDisplayName());
+        dto.setInviteeProfileImageUrl(userInfo.getProfileImageUrl());
+        
+        return dto;
     }
 
     @Scheduled(cron = "0 0 * * * *") // Run every hour

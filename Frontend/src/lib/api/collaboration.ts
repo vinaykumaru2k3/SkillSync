@@ -52,6 +52,15 @@ export const collaborationApi = {
     return response.data
   },
 
+  // Get enriched project collaborators
+  getEnrichedProjectCollaborators: async (projectId: string, ownerId?: string): Promise<any[]> => {
+    const url = ownerId 
+      ? `/collaborations/projects/${projectId}/enriched?ownerId=${ownerId}`
+      : `/collaborations/projects/${projectId}/enriched`
+    const response = await apiClient.get<ApiResponse<any[]>>(url)
+    return response.data
+  },
+
   // Get pending invitations
   getPendingInvitations: async (): Promise<Collaboration[]> => {
     const response = await apiClient.get<ApiResponse<Collaboration[]>>(

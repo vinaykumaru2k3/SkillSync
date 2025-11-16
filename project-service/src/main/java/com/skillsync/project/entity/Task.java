@@ -32,6 +32,9 @@ public class Task {
     
     private UUID assigneeId;
     
+    @Column(nullable = false)
+    private UUID creatorId;
+    
     @ElementCollection
     @CollectionTable(name = "task_labels", joinColumns = @JoinColumn(name = "task_id"))
     @Column(name = "label")

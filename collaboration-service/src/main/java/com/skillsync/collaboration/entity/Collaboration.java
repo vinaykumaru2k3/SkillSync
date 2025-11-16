@@ -126,11 +126,6 @@ public class Collaboration {
 
     public void setStatus(CollaborationStatus status) {
         this.status = status;
-        if (status == CollaborationStatus.ACCEPTED || 
-            status == CollaborationStatus.DECLINED || 
-            status == CollaborationStatus.REVOKED) {
-            this.respondedAt = Instant.now();
-        }
     }
 
     public Set<Permission> getPermissions() {

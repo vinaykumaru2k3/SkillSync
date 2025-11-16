@@ -22,11 +22,12 @@ export default function ProjectsPage() {
   
   const queryClient = useQueryClient()
 
-  const { data: projects, isLoading, error } = useQuery({
+  const { data: projectsData, isLoading, error } = useQuery({
     queryKey: ['projects', searchParams],
-    queryFn: () => {
+    queryFn: async () => {
       if (searchParams.searchTerm || searchParams.tags.length > 0 || searchParams.technologies.length > 0) {
-        return projectService.searchProjects(searchParams)
+        const results = await projectService.searchProjects(searchParams)
+        return { owned: results, collaborated: [] }
       }
       return projectService.getMyProjects()
     },
@@ -62,8 +63,9 @@ export default function ProjectsPage() {
     )
   }
 
-  // For new users or API errors, show empty state instead of error
-  const displayProjects = projects || []
+  const ownedProjects = projectsData?.owned || []
+  const collaboratedProjects = projectsData?.collaborated || []
+  const isSearching = searchParams.searchTerm || searchParams.tags.length > 0 || searchParams.technologies.length > 0
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -83,10 +85,32 @@ export default function ProjectsPage() {
           currentTechnologies={searchParams.technologies}
         />
 
-        <ProjectList
-          projects={displayProjects}
-          emptyMessage="No projects found. Create your first project to get started!"
-        />
+        {isSearching ? (
+          <ProjectList
+            projects={ownedProjects}
+            emptyMessage="No projects found matching your search."
+          />
+        ) : (
+          <>
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">My Projects</h2>
+              <ProjectList
+                projects={ownedProjects}
+                emptyMessage="No projects yet. Create your first project to get started!"
+              />
+            </div>
+
+            {collaboratedProjects.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Collaborated Projects</h2>
+                <ProjectList
+                  projects={collaboratedProjects}
+                  emptyMessage=""
+                />
+              </div>
+            )}
+          </>
+        )}
 
         <CreateProjectModal
           isOpen={isCreateModalOpen}

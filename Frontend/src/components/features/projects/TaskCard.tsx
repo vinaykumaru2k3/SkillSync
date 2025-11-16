@@ -69,6 +69,25 @@ export function TaskCard({ task, onClick, canEdit = true }: TaskCardProps) {
           Due: {new Date(task.dueDate).toLocaleDateString()}
         </div>
       )}
+
+      {task.creatorUsername && (
+        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+          {task.creatorProfileImageUrl ? (
+            <img
+              src={task.creatorProfileImageUrl}
+              alt={task.creatorUsername}
+              className="w-5 h-5 rounded-full"
+            />
+          ) : (
+            <div className="w-5 h-5 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-xs text-gray-600 dark:text-gray-300">
+              {task.creatorUsername.charAt(0).toUpperCase()}
+            </div>
+          )}
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            {task.creatorUsername}
+          </span>
+        </div>
+      )}
     </div>
   )
 }

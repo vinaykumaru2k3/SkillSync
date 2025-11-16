@@ -7,9 +7,10 @@ import CollaboratorList from './CollaboratorList'
 interface CollaborationManagerProps {
   projectId: string
   isOwner: boolean
+  ownerId?: string
 }
 
-export default function CollaborationManager({ projectId, isOwner }: CollaborationManagerProps) {
+export default function CollaborationManager({ projectId, isOwner, ownerId }: CollaborationManagerProps) {
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
 
@@ -44,7 +45,7 @@ export default function CollaborationManager({ projectId, isOwner }: Collaborati
         )}
       </div>
 
-      <CollaboratorList projectId={projectId} isOwner={isOwner} onRefresh={refreshKey} />
+      <CollaboratorList projectId={projectId} isOwner={isOwner} ownerId={ownerId} onRefresh={refreshKey} />
 
       <InviteCollaboratorModal
         projectId={projectId}

@@ -37,11 +37,10 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         "/oauth2",
         "/login/oauth2",
         "/actuator",
-        "/api/v1/projects/public",  // Only public project discovery
-        "/api/v1/projects/discover",  // Only public project discovery
-        "/api/v1/projects/search",  // Only public project search
-        "/api/v1/users",  // Allow profile creation (temporary)
-        "/api/v1/users/user",  // Allow viewing user profiles
+        "/api/v1/projects/public",
+        "/api/v1/projects/discover",
+        "/api/v1/projects/search",
+        "/api/v1/users/user/",  // Allow viewing user profiles by userId
         "/api/v1/users/search"  // Allow searching users
     );
     
@@ -82,7 +81,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                     .header("X-User-Roles", String.join(",", roles))
                     .build();
             
-            logger.debug("Authenticated request for user: {} ({})", email, userId);
+            logger.info("JWT Filter - Added headers: X-User-Id={}, X-User-Email={}, Path={}", userId, email, path);
             
             return chain.filter(exchange.mutate().request(modifiedRequest).build());
             

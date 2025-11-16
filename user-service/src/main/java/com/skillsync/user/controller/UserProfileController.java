@@ -66,7 +66,12 @@ public class UserProfileController {
         
         // Verify user owns this profile
         UserProfileDto existingProfile = userProfileService.getProfileById(id);
+        System.out.println("Update Profile - Profile ID: " + id);
+        System.out.println("Update Profile - Authenticated User ID: " + authenticatedUserId);
+        System.out.println("Update Profile - Profile Owner ID: " + existingProfile.getUserId());
+        
         if (authenticatedUserId == null || !authenticatedUserId.equals(existingProfile.getUserId().toString())) {
+            System.out.println("Update Profile - FORBIDDEN: User does not own this profile");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         
@@ -144,10 +149,14 @@ public class UserProfileController {
             @RequestParam("file") MultipartFile file,
             @RequestHeader(value = "X-User-Id", required = false) String authenticatedUserId) {
         try {
+            if (authenticatedUserId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication required");
+            }
+            
             // Verify user owns this profile
             UserProfileDto existingProfile = userProfileService.getProfileById(id);
-            if (authenticatedUserId == null || !authenticatedUserId.equals(existingProfile.getUserId().toString())) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized");
+            if (!authenticatedUserId.equals(existingProfile.getUserId().toString())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can only upload avatar for your own profile");
             }
             
             String fileUrl = fileStorageService.storeFile(file);

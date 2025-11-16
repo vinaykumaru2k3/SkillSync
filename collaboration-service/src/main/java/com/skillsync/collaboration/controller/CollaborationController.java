@@ -1,6 +1,7 @@
 package com.skillsync.collaboration.controller;
 
 import com.skillsync.collaboration.dto.CollaborationDTO;
+import com.skillsync.collaboration.dto.EnrichedCollaboratorDTO;
 import com.skillsync.collaboration.dto.EnrichedInvitationDTO;
 import com.skillsync.collaboration.dto.InvitationRequest;
 import com.skillsync.collaboration.dto.InvitationResponse;
@@ -102,6 +103,18 @@ public class CollaborationController {
         return ResponseEntity.ok(ApiResponse.success(collaborators));
     }
 
+    @GetMapping("/projects/{projectId}/enriched")
+    public ResponseEntity<ApiResponse<List<EnrichedCollaboratorDTO>>> getEnrichedProjectCollaborators(
+            @PathVariable UUID projectId,
+            @RequestParam(required = false) UUID ownerId) {
+        
+        logger.info("Fetching enriched collaborators for project {}", projectId);
+
+        List<EnrichedCollaboratorDTO> collaborators = collaborationService.getEnrichedProjectCollaborators(projectId, ownerId);
+
+        return ResponseEntity.ok(ApiResponse.success(collaborators));
+    }
+
     @GetMapping("/invites/pending")
     public ResponseEntity<ApiResponse<List<CollaborationDTO>>> getPendingInvitations(
             @RequestHeader("X-User-Id") String userIdStr) {
@@ -157,19 +170,27 @@ public class CollaborationController {
         UUID userId = UUID.fromString(userIdStr);
         logger.info("Checking permissions for user {} on project {}", userId, projectId);
 
+        boolean isOwner = collaborationService.isProjectOwner(projectId, userId);
         boolean isCollaborator = collaborationService.hasPermission(
                 projectId, userId, com.skillsync.collaboration.entity.Permission.READ);
         
         Map<String, Object> permissions = new HashMap<>();
-        permissions.put("isCollaborator", isCollaborator);
-        permissions.put("canRead", collaborationService.hasPermission(
+        permissions.put("isCollaborator", isCollaborator || isOwner);
+        permissions.put("canRead", isOwner || collaborationService.hasPermission(
                 projectId, userId, com.skillsync.collaboration.entity.Permission.READ));
-        permissions.put("canWrite", collaborationService.hasPermission(
+        permissions.put("canWrite", isOwner || collaborationService.hasPermission(
                 projectId, userId, com.skillsync.collaboration.entity.Permission.WRITE));
-        permissions.put("canDelete", collaborationService.hasPermission(
+        permissions.put("canDelete", isOwner || collaborationService.hasPermission(
                 projectId, userId, com.skillsync.collaboration.entity.Permission.DELETE));
 
         return ResponseEntity.ok(ApiResponse.success(permissions));
+    }
+
+    @GetMapping("/user/{userId}/projects")
+    public ResponseEntity<List<UUID>> getUserCollaboratedProjects(@PathVariable UUID userId) {
+        logger.info("Fetching collaborated project IDs for user {}", userId);
+        List<UUID> projectIds = collaborationService.getUserCollaboratedProjectIds(userId);
+        return ResponseEntity.ok(projectIds);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.skillsync.project.service;
 
+import com.skillsync.project.client.UserServiceClient;
 import com.skillsync.project.dto.TaskMoveRequest;
 import com.skillsync.project.dto.TaskRequest;
 import com.skillsync.project.dto.TaskResponse;
@@ -23,9 +24,10 @@ public class TaskService {
     
     private final TaskRepository taskRepository;
     private final BoardColumnRepository boardColumnRepository;
+    private final UserServiceClient userServiceClient;
     
     @Transactional
-    public TaskResponse createTask(TaskRequest request) {
+    public TaskResponse createTask(UUID creatorId, TaskRequest request) {
         log.debug("Creating task in column: {}", request.getColumnId());
         
         BoardColumn column = boardColumnRepository.findById(request.getColumnId())
@@ -35,6 +37,7 @@ public class TaskService {
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
         task.setAssigneeId(request.getAssigneeId());
+        task.setCreatorId(creatorId);
         task.setLabels(request.getLabels());
         task.setPriority(request.getPriority());
         task.setStatus(request.getStatus());
@@ -163,6 +166,15 @@ public class TaskService {
         response.setTitle(task.getTitle());
         response.setDescription(task.getDescription());
         response.setAssigneeId(task.getAssigneeId());
+        response.setCreatorId(task.getCreatorId());
+        
+        log.info("Fetching creator info for user ID: {}", task.getCreatorId());
+        UserServiceClient.UserInfo creatorInfo = userServiceClient.getUserInfo(task.getCreatorId());
+        log.info("Creator info received - username: {}, profileImageUrl: {}", 
+                creatorInfo.getUsername(), creatorInfo.getProfileImageUrl());
+        response.setCreatorUsername(creatorInfo.getUsername());
+        response.setCreatorProfileImageUrl(creatorInfo.getProfileImageUrl());
+        
         response.setLabels(task.getLabels());
         response.setPriority(task.getPriority());
         response.setStatus(task.getStatus());

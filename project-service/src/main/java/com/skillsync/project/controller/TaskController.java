@@ -23,9 +23,11 @@ public class TaskController {
     private final TaskService taskService;
     
     @PostMapping
-    public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody TaskRequest request) {
+    public ResponseEntity<TaskResponse> createTask(
+            @RequestHeader(value = "X-User-Id") UUID userId,
+            @Valid @RequestBody TaskRequest request) {
         log.info("Creating task in column: {}", request.getColumnId());
-        TaskResponse response = taskService.createTask(request);
+        TaskResponse response = taskService.createTask(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
     

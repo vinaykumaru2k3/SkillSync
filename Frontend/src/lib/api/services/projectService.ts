@@ -22,8 +22,8 @@ export const projectService = {
     return apiClient.get<Project[]>(`/projects/owner/${ownerId}`)
   },
 
-  getMyProjects: async (): Promise<Project[]> => {
-    return apiClient.get<Project[]>('/projects/my-projects')
+  getMyProjects: async (): Promise<{ owned: Project[]; collaborated: Project[] }> => {
+    return apiClient.get<{ owned: Project[]; collaborated: Project[] }>('/projects/my-projects')
   },
 
   getAllPublicProjects: async (): Promise<Project[]> => {

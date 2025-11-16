@@ -7,10 +7,11 @@ import { Collaboration, CollaborationRole, CollaborationStatus } from '@/types/c
 interface CollaboratorListProps {
   projectId: string
   isOwner: boolean
+  ownerId?: string
   onRefresh?: number
 }
 
-export default function CollaboratorList({ projectId, isOwner, onRefresh }: CollaboratorListProps) {
+export default function CollaboratorList({ projectId, isOwner, ownerId, onRefresh }: CollaboratorListProps) {
   const [collaborators, setCollaborators] = useState<Collaboration[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -23,7 +24,7 @@ export default function CollaboratorList({ projectId, isOwner, onRefresh }: Coll
     try {
       setIsLoading(true)
       setError(null)
-      const data = await collaborationApi.getProjectCollaborators(projectId)
+      const data = await collaborationApi.getEnrichedProjectCollaborators(projectId, ownerId)
       setCollaborators(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load collaborators')
@@ -102,14 +103,27 @@ export default function CollaboratorList({ projectId, isOwner, onRefresh }: Coll
         >
           <div className="flex-1">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                {collab.inviteeId.substring(0, 2).toUpperCase()}
-              </div>
+              {(collab as any).inviteeProfileImageUrl ? (
+                <img
+                  src={(collab as any).inviteeProfileImageUrl}
+                  alt={(collab as any).inviteeDisplayName || 'User'}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
+                  {((collab as any).inviteeDisplayName || 'U').substring(0, 2).toUpperCase()}
+                </div>
+              )}
               <div>
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  User {collab.inviteeId.substring(0, 8)}...
+                  {(collab as any).inviteeDisplayName || `User ${collab.inviteeId.substring(0, 8)}...`}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
+                  {(collab as any).inviteeUsername && (
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      @{(collab as any).inviteeUsername}
+                    </span>
+                  )}
                   <span
                     className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getRoleBadgeColor(
                       collab.role

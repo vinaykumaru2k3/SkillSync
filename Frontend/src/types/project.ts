@@ -20,6 +20,9 @@ export interface Task {
   title: string
   description?: string
   assigneeId?: string
+  creatorId: string
+  creatorUsername: string
+  creatorProfileImageUrl?: string
   labels: string[]
   priority: TaskPriority
   status: TaskStatus

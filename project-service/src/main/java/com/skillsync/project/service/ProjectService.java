@@ -1,5 +1,6 @@
 package com.skillsync.project.service;
 
+import com.skillsync.project.client.CollaborationServiceClient;
 import com.skillsync.project.dto.*;
 import com.skillsync.project.entity.BoardColumn;
 import com.skillsync.project.entity.Project;
@@ -14,9 +15,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +26,8 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final BoardColumnRepository boardColumnRepository;
     private final TaskRepository taskRepository;
+    private final CollaborationServiceClient collaborationServiceClient;
+    private final com.skillsync.project.client.UserServiceClient userServiceClient;
     
     @Transactional
     public ProjectResponse createProject(UUID ownerId, ProjectRequest request) {
@@ -75,6 +76,28 @@ public class ProjectService {
                 .map(this::mapToProjectResponse)
                 .collect(Collectors.toList());
     }
+
+    @Transactional(readOnly = true)
+    public Map<String, List<ProjectResponse>> getMyProjects(UUID userId) {
+        log.debug("Fetching all projects for user: {}", userId);
+        
+        Map<String, List<ProjectResponse>> result = new HashMap<>();
+        
+        // Get owned projects
+        List<ProjectResponse> ownedProjects = projectRepository.findByOwnerId(userId).stream()
+                .map(this::mapToProjectResponse)
+                .collect(Collectors.toList());
+        result.put("owned", ownedProjects);
+        
+        // Get collaborated projects
+        List<UUID> collaboratedProjectIds = collaborationServiceClient.getCollaboratedProjectIds(userId);
+        List<ProjectResponse> collaboratedProjects = projectRepository.findAllById(collaboratedProjectIds).stream()
+                .map(this::mapToProjectResponse)
+                .collect(Collectors.toList());
+        result.put("collaborated", collaboratedProjects);
+        
+        return result;
+    }
     
     @Transactional(readOnly = true)
     public List<ProjectResponse> getAllPublicProjects() {
@@ -85,14 +108,18 @@ public class ProjectService {
     }
     
     @Transactional
-    public ProjectResponse updateProject(UUID projectId, UUID ownerId, ProjectRequest request) {
+    public ProjectResponse updateProject(UUID projectId, UUID userId, ProjectRequest request) {
         log.debug("Updating project: {}", projectId);
         
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Project not found with ID: " + projectId));
         
-        if (!project.getOwnerId().equals(ownerId)) {
-            throw new RuntimeException("User is not the owner of this project");
+        // Check if user is owner or has write permission
+        boolean isOwner = project.getOwnerId().equals(userId);
+        boolean hasWritePermission = collaborationServiceClient.hasWritePermission(projectId, userId);
+        
+        if (!isOwner && !hasWritePermission) {
+            throw new RuntimeException("User does not have permission to update this project");
         }
         
         project.setName(request.getName());
@@ -182,6 +209,7 @@ public class ProjectService {
         response.setTitle(task.getTitle());
         response.setDescription(task.getDescription());
         response.setAssigneeId(task.getAssigneeId());
+        response.setCreatorId(task.getCreatorId());
         response.setLabels(task.getLabels());
         response.setPriority(task.getPriority());
         response.setStatus(task.getStatus());
@@ -190,6 +218,17 @@ public class ProjectService {
         response.setColumnId(task.getColumn().getId());
         response.setCreatedAt(task.getCreatedAt());
         response.setUpdatedAt(task.getUpdatedAt());
+        
+        if (task.getCreatorId() != null) {
+            try {
+                com.skillsync.project.client.UserServiceClient.UserInfo userInfo = userServiceClient.getUserInfo(task.getCreatorId());
+                response.setCreatorUsername(userInfo.getUsername());
+                response.setCreatorProfileImageUrl(userInfo.getProfileImageUrl());
+            } catch (Exception e) {
+                log.warn("Failed to fetch creator info for task {}: {}", task.getId(), e.getMessage());
+            }
+        }
+        
         return response;
     }
 }

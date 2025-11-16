@@ -62,6 +62,7 @@ export function ProfileImageUpload({ currentImageUrl, onUpload }: ProfileImageUp
       
       // Update profile with new image URL
       await onUpload(imageUrl)
+      alert('Profile picture updated successfully!')
     } catch (error) {
       console.error('Upload failed:', error)
       alert(error instanceof Error ? error.message : 'Failed to upload image. Please try again.')

@@ -22,6 +22,8 @@ export function EditProjectModal({ isOpen, onClose, onSubmit, project }: EditPro
     technologies: project.technologies,
     repositoryUrl: project.repositoryUrl,
   })
+  const [tagInput, setTagInput] = useState('')
+  const [techInput, setTechInput] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
@@ -54,6 +56,40 @@ export function EditProjectModal({ isOpen, onClose, onSubmit, project }: EditPro
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const handleAddTag = () => {
+    if (tagInput.trim() && !formData.tags?.includes(tagInput.trim())) {
+      setFormData({
+        ...formData,
+        tags: [...(formData.tags || []), tagInput.trim()],
+      })
+      setTagInput('')
+    }
+  }
+
+  const handleRemoveTag = (tag: string) => {
+    setFormData({
+      ...formData,
+      tags: formData.tags?.filter((t) => t !== tag) || [],
+    })
+  }
+
+  const handleAddTech = () => {
+    if (techInput.trim() && !formData.technologies?.includes(techInput.trim())) {
+      setFormData({
+        ...formData,
+        technologies: [...(formData.technologies || []), techInput.trim()],
+      })
+      setTechInput('')
+    }
+  }
+
+  const handleRemoveTech = (tech: string) => {
+    setFormData({
+      ...formData,
+      technologies: formData.technologies?.filter((t) => t !== tech) || [],
+    })
   }
 
   return (
@@ -117,6 +153,80 @@ export function EditProjectModal({ isOpen, onClose, onSubmit, project }: EditPro
             onChange={(e) => setFormData({ ...formData, repositoryUrl: e.target.value })}
             placeholder="https://github.com/username/repo"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Tags
+          </label>
+          <div className="flex gap-2 mb-2">
+            <Input
+              type="text"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+              placeholder="Add tag..."
+            />
+            <Button type="button" onClick={handleAddTag} size="sm">
+              Add
+            </Button>
+          </div>
+          {formData.tags && formData.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {formData.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveTag(tag)}
+                    className="hover:text-blue-600 dark:hover:text-blue-300"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Technologies
+          </label>
+          <div className="flex gap-2 mb-2">
+            <Input
+              type="text"
+              value={techInput}
+              onChange={(e) => setTechInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTech())}
+              placeholder="Add technology..."
+            />
+            <Button type="button" onClick={handleAddTech} size="sm">
+              Add
+            </Button>
+          </div>
+          {formData.technologies && formData.technologies.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {formData.technologies.map((tech) => (
+                <span
+                  key={tech}
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm"
+                >
+                  {tech}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveTech(tech)}
+                    className="hover:text-green-600 dark:hover:text-green-300"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end gap-3 pt-4">
