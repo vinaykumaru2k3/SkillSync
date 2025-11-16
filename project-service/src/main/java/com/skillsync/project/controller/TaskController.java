@@ -54,10 +54,11 @@ public class TaskController {
     
     @PutMapping("/{taskId}")
     public ResponseEntity<TaskResponse> updateTask(
+            @RequestHeader(value = "X-User-Id") UUID userId,
             @PathVariable("taskId") UUID taskId,
             @Valid @RequestBody TaskRequest request) {
         log.info("Updating task: {}", taskId);
-        TaskResponse response = taskService.updateTask(taskId, request);
+        TaskResponse response = taskService.updateTask(taskId, request, userId);
         return ResponseEntity.ok(response);
     }
     

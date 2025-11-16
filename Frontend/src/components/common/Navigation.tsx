@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useUserProfile } from '@/hooks/useUserProfile'
 import { Button } from './Button'
 import { ThemeToggle } from './ThemeToggle'
+import { NotificationDropdown } from '@/components/features/notifications'
 
 export function Navigation() {
   const { user, logout } = useAuth()
@@ -81,6 +82,7 @@ export function Navigation() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <NotificationDropdown />
             <ThemeToggle />
             {hasProfile && (
               <button

@@ -119,7 +119,6 @@ public class GatewayConfig {
                 .route("notification-service", r -> r
                         .path("/api/v1/notifications/**")
                         .filters(f -> f
-                                .stripPrefix(2)
                                 .filter(new SecurityHeadersFilter())
                                 .requestRateLimiter(config -> config
                                         .setRateLimiter(redisRateLimiter)

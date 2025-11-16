@@ -28,6 +28,7 @@ public class ProjectService {
     private final TaskRepository taskRepository;
     private final CollaborationServiceClient collaborationServiceClient;
     private final com.skillsync.project.client.UserServiceClient userServiceClient;
+    private final EventPublisher eventPublisher;
     
     @Transactional
     public ProjectResponse createProject(UUID ownerId, ProjectRequest request) {
@@ -131,6 +132,8 @@ public class ProjectService {
         
         Project updatedProject = projectRepository.save(project);
         log.info("Project updated: {}", projectId);
+        
+        eventPublisher.publishProjectUpdated(updatedProject, userId);
         
         return mapToProjectResponse(updatedProject);
     }

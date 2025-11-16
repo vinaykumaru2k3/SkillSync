@@ -25,6 +25,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final BoardColumnRepository boardColumnRepository;
     private final UserServiceClient userServiceClient;
+    private final EventPublisher eventPublisher;
     
     @Transactional
     public TaskResponse createTask(UUID creatorId, TaskRequest request) {
@@ -47,6 +48,10 @@ public class TaskService {
         
         Task savedTask = taskRepository.save(task);
         log.info("Task created with ID: {}", savedTask.getId());
+        
+        if (savedTask.getAssigneeId() != null) {
+            eventPublisher.publishTaskAssigned(savedTask, column.getProject());
+        }
         
         return mapToTaskResponse(savedTask);
     }
@@ -76,11 +81,13 @@ public class TaskService {
     }
     
     @Transactional
-    public TaskResponse updateTask(UUID taskId, TaskRequest request) {
+    public TaskResponse updateTask(UUID taskId, TaskRequest request, UUID userId) {
         log.debug("Updating task: {}", taskId);
         
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found with ID: " + taskId));
+        
+        UUID oldAssigneeId = task.getAssigneeId();
         
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
@@ -92,6 +99,12 @@ public class TaskService {
         
         Task updatedTask = taskRepository.save(task);
         log.info("Task updated: {}", taskId);
+        
+        if (request.getAssigneeId() != null && !request.getAssigneeId().equals(oldAssigneeId)) {
+            eventPublisher.publishTaskAssigned(updatedTask, task.getColumn().getProject());
+        } else {
+            eventPublisher.publishTaskUpdated(updatedTask, task.getColumn().getProject(), userId);
+        }
         
         return mapToTaskResponse(updatedTask);
     }

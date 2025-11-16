@@ -17,6 +17,11 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: skillsync
+    password: skillsync123
 
 jwt:
   secret: ${JWT_SECRET:mySecretKeyForSkillSyncPlatformThatIsLongEnough}
@@ -41,3 +46,8 @@ spring:
       on-profile: docker
   datasource:
     url: jdbc:postgresql://postgres:5432/collaboration_service
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: skillsync
+    password: skillsync123

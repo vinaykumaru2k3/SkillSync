@@ -340,40 +340,40 @@
 
 ## Phase 6: Real-time Notifications & Communication
 
-- [ ] 10. Notification Service - Backend & Frontend
-  - [ ] 10.1 Backend: Create notification entities and event models
+- [x] 10. Notification Service - Backend & Frontend
+  - [x] 10.1 Backend: Create notification entities and event models
     - Implement Notification entity with delivery preferences
     - Create event-driven notification data models
     - Add notification type definitions and templates
     - _Requirements: 7.1, 7.3, 7.4_
   
-  - [ ] 10.2 Backend: Implement WebSocket real-time notifications
+  - [x] 10.2 Backend: Implement WebSocket real-time notifications
     - Configure Spring WebSocket for real-time messaging
     - Create WebSocket handlers for user connections
     - Implement notification broadcasting to connected clients
     - Add connection management and heartbeat mechanism
     - _Requirements: 7.1, 7.3_
   
-  - [ ] 10.3 Backend: Add email notification system
+  - [x] 10.3 Backend: Add email notification system
     - Integrate email service with SMTP configuration
     - Create email templates for different notification types
     - Implement retry logic for failed email deliveries
     - _Requirements: 7.2, 7.5_
   
-  - [ ] 10.4 Backend: Implement event-driven notification processing
+  - [x] 10.4 Backend: Implement event-driven notification processing
     - Configure RabbitMQ message consumers for notification events
     - Create notification routing based on user preferences
     - Add notification persistence and read status tracking
     - _Requirements: 6.5, 7.3, 7.4_
   
-  - [ ] 10.5 Frontend: Implement WebSocket connection management
+  - [x] 10.5 Frontend: Implement WebSocket connection management
     - Create WebSocket context and hooks for real-time updates
     - Add connection status indicators and reconnection logic
     - Implement real-time task updates on Kanban boards
     - Add live collaboration indicators (user presence)
     - _Requirements: 7.1, 7.3_
   
-  - [ ] 10.6 Frontend: Build notification system interface
+  - [x] 10.6 Frontend: Build notification system interface
     - Create notification dropdown with unread indicators
     - Implement notification types (mentions, invitations, feedback)
     - Add notification preferences management

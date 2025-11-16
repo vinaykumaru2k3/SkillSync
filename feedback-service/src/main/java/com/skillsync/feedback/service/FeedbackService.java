@@ -24,15 +24,21 @@ public class FeedbackService {
     private final RatingAggregationRepository ratingAggregationRepository;
     private final UserServiceClient userServiceClient;
     private final ModerationService moderationService;
+    private final EventPublisher eventPublisher;
+    private final com.skillsync.feedback.client.ProjectServiceClient projectServiceClient;
 
     public FeedbackService(FeedbackRepository feedbackRepository,
                           RatingAggregationRepository ratingAggregationRepository,
                           UserServiceClient userServiceClient,
-                          ModerationService moderationService) {
+                          ModerationService moderationService,
+                          EventPublisher eventPublisher,
+                          com.skillsync.feedback.client.ProjectServiceClient projectServiceClient) {
         this.feedbackRepository = feedbackRepository;
         this.ratingAggregationRepository = ratingAggregationRepository;
         this.userServiceClient = userServiceClient;
         this.moderationService = moderationService;
+        this.eventPublisher = eventPublisher;
+        this.projectServiceClient = projectServiceClient;
     }
 
     @Transactional
@@ -55,6 +61,10 @@ public class FeedbackService {
 
         feedback = feedbackRepository.save(feedback);
         updateRatingAggregation(request.getProjectId(), request.getRating(), true);
+        
+        UserServiceClient.UserInfo authorInfo = userServiceClient.getUserInfo(authorId);
+        com.skillsync.feedback.client.ProjectServiceClient.ProjectInfo projectInfo = projectServiceClient.getProjectInfo(request.getProjectId());
+        eventPublisher.publishFeedbackReceived(projectInfo.getOwnerId(), request.getProjectId(), projectInfo.getName(), authorInfo.getDisplayName(), request.getRating());
         
         return mapToResponse(feedback, authorId);
     }
