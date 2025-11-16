@@ -6,10 +6,12 @@ import { githubService } from '@/lib/api/services';
 import { Button } from '@/components/common/Button';
 import { Card } from '@/components/common/Card';
 import { Spinner } from '@/components/common/Spinner';
+import { useToast } from '@/contexts/ToastContext';
 import type { GitHubRepository, SyncStatus } from '@/types/github';
 
 export function GitHubSync() {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const [isSyncing, setIsSyncing] = useState(false);
   const [githubToken, setGithubToken] = useState('');
   const [showTokenInput, setShowTokenInput] = useState(false);
@@ -41,10 +43,18 @@ export function GitHubSync() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['github-repositories'] });
       queryClient.invalidateQueries({ queryKey: ['github-sync-status'] });
+      showToast('GitHub repositories synced successfully!', 'success');
       setIsSyncing(false);
     },
     onError: (error) => {
       console.error('Sync failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sync repositories';
+      if (errorMessage.includes('401') || errorMessage.includes('UNAUTHORIZED')) {
+        showToast('GitHub authentication failed. Please check your access token and try again.', 'error');
+        setShowTokenInput(true);
+      } else {
+        showToast(errorMessage, 'error');
+      }
       setIsSyncing(false);
     },
   });
