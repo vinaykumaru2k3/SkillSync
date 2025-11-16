@@ -5,6 +5,8 @@ import { Modal } from '@/components/common/Modal'
 import { Input } from '@/components/common/Input'
 import { Button } from '@/components/common/Button'
 import { Task, TaskRequest, TaskPriority, TaskStatus } from '@/types/project'
+import { TaskComments } from './TaskComments'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface TaskModalProps {
   isOpen: boolean
@@ -13,9 +15,11 @@ interface TaskModalProps {
   onDelete?: () => Promise<void>
   task?: Task
   columnId: string
+  projectId: string
 }
 
-export function TaskModal({ isOpen, onClose, onSubmit, onDelete, task, columnId }: TaskModalProps) {
+export function TaskModal({ isOpen, onClose, onSubmit, onDelete, task, columnId, projectId }: TaskModalProps) {
+  const { user } = useAuth()
   const [formData, setFormData] = useState<TaskRequest>({
     title: '',
     description: '',
@@ -268,6 +272,12 @@ export function TaskModal({ isOpen, onClose, onSubmit, onDelete, task, columnId 
           </div>
         </div>
       </form>
+
+      {task && user && (
+        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <TaskComments taskId={task.id} currentUserId={user.userId} projectId={projectId} />
+        </div>
+      )}
     </Modal>
   )
 }

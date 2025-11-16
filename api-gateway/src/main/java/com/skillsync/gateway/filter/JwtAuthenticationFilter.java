@@ -41,6 +41,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         "/api/v1/projects/discover",
         "/api/v1/projects/search",
         "/api/v1/users/user/",
+        "/api/v1/users/username/",
         "/api/v1/users/search",
         "/api/v1/feedback/project/",
         "/api/v1/github/stats/",

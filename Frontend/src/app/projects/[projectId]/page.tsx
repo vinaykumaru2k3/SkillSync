@@ -424,6 +424,7 @@ export default function ProjectDetailPage() {
         onDelete={selectedTask ? handleTaskDelete : undefined}
         task={selectedTask}
         columnId={selectedColumnId}
+        projectId={projectId}
       />
 
       <EditProjectModal

@@ -27,6 +27,26 @@ public class UserServiceClient {
             return new UserInfo("Unknown", null);
         }
     }
+    
+    public java.util.Map<String, Object> getUserById(String userId) {
+        try {
+            String url = userServiceUrl + "/api/v1/users/user/" + userId;
+            return restTemplate.getForObject(url, java.util.Map.class);
+        } catch (Exception e) {
+            System.err.println("Failed to fetch user by id " + userId + ": " + e.getMessage());
+            return new java.util.HashMap<>();
+        }
+    }
+    
+    public java.util.Map<String, Object> getUserByUsername(String username) {
+        try {
+            String url = userServiceUrl + "/api/v1/users/username/" + username;
+            return restTemplate.getForObject(url, java.util.Map.class);
+        } catch (Exception e) {
+            System.err.println("Failed to fetch user by username " + username + ": " + e.getMessage());
+            return new java.util.HashMap<>();
+        }
+    }
 
     public static class UserInfo {
         private String username;

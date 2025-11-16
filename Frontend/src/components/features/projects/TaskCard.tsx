@@ -2,6 +2,8 @@
 
 import { Task, TaskPriority } from '@/types/project'
 import { Badge } from '@/components/common/Badge'
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api/client'
 
 interface TaskCardProps {
   task: Task
@@ -10,6 +12,14 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task, onClick, canEdit = true }: TaskCardProps) {
+  const { data: comments = [] } = useQuery({
+    queryKey: ['task-comments', task.id],
+    queryFn: async () => {
+      const response = await apiClient.get<any[]>(`/tasks/${task.id}/comments`)
+      return response
+    },
+  })
+
   const getPriorityColor = (priority: TaskPriority) => {
     switch (priority) {
       case TaskPriority.HIGH:
@@ -64,11 +74,21 @@ export function TaskCard({ task, onClick, canEdit = true }: TaskCardProps) {
         </div>
       )}
 
-      {task.dueDate && (
-        <div className="text-xs text-gray-500 dark:text-gray-400">
-          Due: {new Date(task.dueDate).toLocaleDateString()}
-        </div>
-      )}
+      <div className="flex items-center justify-between">
+        {task.dueDate && (
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            Due: {new Date(task.dueDate).toLocaleDateString()}
+          </div>
+        )}
+        {comments.length > 0 && (
+          <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            {comments.length}
+          </div>
+        )}
+      </div>
 
       {task.creatorUsername && (
         <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">

@@ -53,6 +53,83 @@ public class EventPublisher {
         }
     }
 
+    public void publishTaskCommentNotification(com.skillsync.project.entity.TaskComment comment, Task task, UUID projectId, java.util.Set<String> mentions) {
+        try {
+            
+            // Get project collaborators
+            java.util.Set<UUID> collaboratorIds = getProjectCollaborators(projectId);
+            
+            // Notify task assignee about comment
+            if (task.getAssigneeId() != null && !task.getAssigneeId().equals(comment.getUserId())) {
+                Map<String, Object> userInfo = userServiceClient.getUserById(comment.getUserId().toString());
+                String commenterName = (String) userInfo.getOrDefault("displayName", "Someone");
+                
+                publishNotificationEvent(task.getAssigneeId(), "TASK_COMMENT",
+                    "New Comment",
+                    commenterName + " commented on task: " + task.getTitle(),
+                    "/projects/" + projectId,
+                    task.getId().toString());
+            }
+            
+            // Notify mentioned users (only if they are collaborators)
+            for (String username : mentions) {
+                try {
+                    Map<String, Object> mentionedUser = userServiceClient.getUserByUsername(username);
+                    if (mentionedUser.isEmpty()) continue;
+                    
+                    UUID mentionedUserId = UUID.fromString((String) mentionedUser.get("userId"));
+                    
+                    // Check if mentioned user is a project collaborator
+                    if (!collaboratorIds.contains(mentionedUserId)) {
+                        log.debug("User {} is not a collaborator, skipping mention notification", username);
+                        continue;
+                    }
+                    
+                    if (!mentionedUserId.equals(comment.getUserId())) {
+                        Map<String, Object> userInfo = userServiceClient.getUserById(comment.getUserId().toString());
+                        String commenterName = (String) userInfo.getOrDefault("displayName", "Someone");
+                        
+                        String message = commenterName + " mentioned you: \"" + comment.getContent() + "\"";
+                        publishNotificationEvent(mentionedUserId, "MENTION",
+                            "You were mentioned",
+                            message,
+                            "/projects/" + projectId,
+                            task.getId().toString());
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to notify mentioned user: {}", username, e);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to publish task comment notifications", e);
+        }
+    }
+    
+    private java.util.Set<UUID> getProjectCollaborators(UUID projectId) {
+        try {
+            String url = "http://localhost:8085/api/v1/collaborations/projects/" + projectId;
+            Map<String, Object> response = 
+                new org.springframework.web.client.RestTemplate().getForObject(url, Map.class);
+            
+            java.util.Set<UUID> collaboratorIds = new java.util.HashSet<>();
+            if (response != null && response.containsKey("data")) {
+                java.util.List<Map<String, Object>> collaborators = (java.util.List<Map<String, Object>>) response.get("data");
+                if (collaborators != null) {
+                    for (Map<String, Object> collab : collaborators) {
+                        String inviteeIdStr = (String) collab.get("inviteeId");
+                        if (inviteeIdStr != null) {
+                            collaboratorIds.add(UUID.fromString(inviteeIdStr));
+                        }
+                    }
+                }
+            }
+            return collaboratorIds;
+        } catch (Exception e) {
+            log.error("Failed to fetch project collaborators", e);
+            return new java.util.HashSet<>();
+        }
+    }
+
     private void publishNotificationEvent(UUID userId, String type, String title, String message, String actionUrl, String relatedEntityId) {
         if (rabbitTemplate == null) {
             log.warn("RabbitTemplate not available, skipping notification");
