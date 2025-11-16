@@ -37,7 +37,6 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
   })
 
   // Create profile mutation
-  const { showToast } = useToast()
 
   const createProfileMutation = useMutation({
     mutationFn: (data: any) => userService.createProfile({
