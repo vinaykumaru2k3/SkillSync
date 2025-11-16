@@ -8,7 +8,7 @@ import { z } from 'zod'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/common/Button'
 import { Input } from '@/components/common/Input'
-import { useToast } from '@/hooks/useToast'
+import { useToast } from '@/contexts/ToastContext'
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -20,9 +20,10 @@ type LoginFormData = z.infer<typeof loginSchema>
 export function LoginForm() {
   const router = useRouter()
   const { login, loginWithGithub } = useAuth()
-  const { success, error: showError } = useToast()
+  const { showToast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [oauthError, setOauthError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   // Check for OAuth error in URL
   useState(() => {
@@ -49,12 +50,15 @@ export function LoginForm() {
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
+    setError(null)
     try {
       await login(data)
-      success('Login successful!')
+      showToast('Login successful!', 'success')
       router.push('/dashboard')
-    } catch (error) {
-      showError(error instanceof Error ? error.message : 'Login failed')
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Login failed. Please check your credentials.'
+      setError(errorMessage)
+      showToast(errorMessage, 'error')
     } finally {
       setIsLoading(false)
     }
@@ -85,7 +89,7 @@ export function LoginForm() {
         <p className="mt-2 text-gray-600 dark:text-gray-400">Sign in to your account</p>
       </div>
 
-      {oauthError && (
+      {(oauthError || error) && (
         <div className="rounded-lg bg-red-50 p-4 dark:bg-red-900/20">
           <div className="flex">
             <div className="flex-shrink-0">
@@ -94,7 +98,7 @@ export function LoginForm() {
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm text-red-800 dark:text-red-200">{oauthError}</p>
+              <p className="text-sm text-red-800 dark:text-red-200">{oauthError || error}</p>
             </div>
           </div>
         </div>

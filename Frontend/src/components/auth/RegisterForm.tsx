@@ -8,7 +8,7 @@ import { z } from 'zod'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/common/Button'
 import { Input } from '@/components/common/Input'
-import { useToast } from '@/hooks/useToast'
+import { useToast } from '@/contexts/ToastContext'
 
 const registerSchema = z
   .object({
@@ -26,8 +26,9 @@ type RegisterFormData = z.infer<typeof registerSchema>
 export function RegisterForm() {
   const router = useRouter()
   const { register: registerUser, loginWithGithub } = useAuth()
-  const { success, error: showError } = useToast()
+  const { showToast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const {
     register,
@@ -39,15 +40,18 @@ export function RegisterForm() {
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true)
+    setError(null)
     try {
       await registerUser({
         email: data.email,
         password: data.password,
       })
-      success('Registration successful!')
+      showToast('Registration successful!', 'success')
       router.push('/dashboard')
-    } catch (error) {
-      showError(error instanceof Error ? error.message : 'Registration failed')
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Registration failed. Please try again.'
+      setError(errorMessage)
+      showToast(errorMessage, 'error')
     } finally {
       setIsLoading(false)
     }
@@ -77,6 +81,21 @@ export function RegisterForm() {
         <h1 className="text-3xl font-bold">Create Account</h1>
         <p className="mt-2 text-gray-600 dark:text-gray-400">Sign up to get started</p>
       </div>
+
+      {error && (
+        <div className="rounded-lg bg-red-50 p-4 dark:bg-red-900/20">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
