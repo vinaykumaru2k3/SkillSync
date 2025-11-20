@@ -13,7 +13,10 @@ import java.util.Map;
 import java.util.UUID;
 
 @Entity
-@Table(name = "user_profiles")
+@Table(name = "user_profiles", indexes = {
+        @Index(name = "idx_user_id", columnList = "userId"),
+        @Index(name = "idx_username", columnList = "username")
+})
 public class UserProfile {
 
     @Id

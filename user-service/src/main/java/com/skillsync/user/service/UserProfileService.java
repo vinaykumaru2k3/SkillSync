@@ -11,6 +11,9 @@ import com.skillsync.user.exception.ResourceNotFoundException;
 import com.skillsync.user.mapper.UserProfileMapper;
 import com.skillsync.user.repository.SkillCardRepository;
 import com.skillsync.user.repository.UserProfileRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,6 +81,7 @@ public class UserProfileService {
         userProfileRepository.save(profile);
     }
 
+    @Cacheable(value = "userProfiles", key = "#profileId")
     @Transactional(readOnly = true)
     public UserProfileDto getProfileById(UUID profileId) {
         UserProfile profile = userProfileRepository.findById(profileId)
@@ -85,6 +89,7 @@ public class UserProfileService {
         return mapper.toDto(profile);
     }
 
+    @Cacheable(value = "userProfiles", key = "'user:' + #userId")
     @Transactional(readOnly = true)
     public UserProfileDto getProfileByUserId(UUID userId) {
         UserProfile profile = userProfileRepository.findByUserId(userId)
@@ -92,6 +97,7 @@ public class UserProfileService {
         return mapper.toDto(profile);
     }
 
+    @Cacheable(value = "userProfiles", key = "'username:' + #username")
     @Transactional(readOnly = true)
     public UserProfileDto getProfileByUsername(String username) {
         UserProfile profile = userProfileRepository.findByUsername(username)
@@ -99,6 +105,7 @@ public class UserProfileService {
         return mapper.toDto(profile);
     }
 
+    @CacheEvict(value = "userProfiles", allEntries = true)
     public UserProfileDto updateProfile(UUID profileId, UpdateUserProfileRequest request) {
         UserProfile profile = userProfileRepository.findById(profileId)
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found: " + profileId));

@@ -6,6 +6,7 @@ import com.skillsync.user.dto.UpdateUserProfileRequest;
 import com.skillsync.user.dto.UserProfileDto;
 import com.skillsync.user.service.SimpleFileStorageService;
 import com.skillsync.user.service.UserProfileService;
+import io.micrometer.core.annotation.Timed;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,24 +23,26 @@ public class UserProfileController {
     private final SimpleFileStorageService fileStorageService;
 
     public UserProfileController(UserProfileService userProfileService,
-                                 SimpleFileStorageService fileStorageService) {
+            SimpleFileStorageService fileStorageService) {
         this.userProfileService = userProfileService;
         this.fileStorageService = fileStorageService;
     }
 
+    @Timed(value = "user.profile.create", description = "Time taken to create user profile")
     @PostMapping
     public ResponseEntity<UserProfileDto> createProfile(
             @Valid @RequestBody CreateUserProfileRequest request,
             @RequestHeader(value = "X-User-Id", required = false) String authenticatedUserId) {
-        
+
         if (authenticatedUserId == null || !authenticatedUserId.equals(request.getUserId().toString())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        
+
         UserProfileDto profile = userProfileService.createProfile(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(profile);
     }
 
+    @Timed(value = "user.profile.get", description = "Time taken to get user profile")
     @GetMapping("/{id}")
     public ResponseEntity<UserProfileDto> getProfile(@PathVariable("id") UUID id) {
         UserProfileDto profile = userProfileService.getProfileById(id);
@@ -58,23 +61,24 @@ public class UserProfileController {
         return ResponseEntity.ok(profile);
     }
 
+    @Timed(value = "user.profile.update", description = "Time taken to update user profile")
     @PutMapping("/{id}")
     public ResponseEntity<UserProfileDto> updateProfile(
             @PathVariable("id") UUID id,
             @Valid @RequestBody UpdateUserProfileRequest request,
             @RequestHeader(value = "X-User-Id", required = false) String authenticatedUserId) {
-        
+
         // Verify user owns this profile
         UserProfileDto existingProfile = userProfileService.getProfileById(id);
         System.out.println("Update Profile - Profile ID: " + id);
         System.out.println("Update Profile - Authenticated User ID: " + authenticatedUserId);
         System.out.println("Update Profile - Profile Owner ID: " + existingProfile.getUserId());
-        
+
         if (authenticatedUserId == null || !authenticatedUserId.equals(existingProfile.getUserId().toString())) {
             System.out.println("Update Profile - FORBIDDEN: User does not own this profile");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        
+
         UserProfileDto profile = userProfileService.updateProfile(id, request);
         return ResponseEntity.ok(profile);
     }
@@ -83,13 +87,13 @@ public class UserProfileController {
     public ResponseEntity<Void> deleteProfile(
             @PathVariable("id") UUID id,
             @RequestHeader(value = "X-User-Id", required = false) String authenticatedUserId) {
-        
+
         // Verify user owns this profile
         UserProfileDto existingProfile = userProfileService.getProfileById(id);
         if (authenticatedUserId == null || !authenticatedUserId.equals(existingProfile.getUserId().toString())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        
+
         userProfileService.deleteProfile(id);
         return ResponseEntity.noContent().build();
     }
@@ -99,13 +103,13 @@ public class UserProfileController {
             @PathVariable("id") UUID id,
             @Valid @RequestBody SkillCardDto skillDto,
             @RequestHeader(value = "X-User-Id", required = false) String authenticatedUserId) {
-        
+
         // Verify user owns this profile
         UserProfileDto existingProfile = userProfileService.getProfileById(id);
         if (authenticatedUserId == null || !authenticatedUserId.equals(existingProfile.getUserId().toString())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        
+
         SkillCardDto skill = userProfileService.addSkill(id, skillDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(skill);
     }
@@ -116,13 +120,13 @@ public class UserProfileController {
             @PathVariable("skillId") UUID skillId,
             @Valid @RequestBody SkillCardDto skillDto,
             @RequestHeader(value = "X-User-Id", required = false) String authenticatedUserId) {
-        
+
         // Verify user owns this profile
         UserProfileDto existingProfile = userProfileService.getProfileById(id);
         if (authenticatedUserId == null || !authenticatedUserId.equals(existingProfile.getUserId().toString())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        
+
         SkillCardDto skill = userProfileService.updateSkill(id, skillId, skillDto);
         return ResponseEntity.ok(skill);
     }
@@ -132,13 +136,13 @@ public class UserProfileController {
             @PathVariable("id") UUID id,
             @PathVariable("skillId") UUID skillId,
             @RequestHeader(value = "X-User-Id", required = false) String authenticatedUserId) {
-        
+
         // Verify user owns this profile
         UserProfileDto existingProfile = userProfileService.getProfileById(id);
         if (authenticatedUserId == null || !authenticatedUserId.equals(existingProfile.getUserId().toString())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        
+
         userProfileService.deleteSkill(id, skillId);
         return ResponseEntity.noContent().build();
     }
@@ -152,13 +156,14 @@ public class UserProfileController {
             if (authenticatedUserId == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication required");
             }
-            
+
             // Verify user owns this profile
             UserProfileDto existingProfile = userProfileService.getProfileById(id);
             if (!authenticatedUserId.equals(existingProfile.getUserId().toString())) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can only upload avatar for your own profile");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("You can only upload avatar for your own profile");
             }
-            
+
             String fileUrl = fileStorageService.storeFile(file);
             userProfileService.updateProfileImage(id, fileUrl);
             return ResponseEntity.ok(fileUrl);
