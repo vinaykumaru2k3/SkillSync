@@ -104,6 +104,19 @@ public class EventPublisher {
             log.error("Failed to publish task comment notifications", e);
         }
     }
+    public void publishEvent(String exchange, String routingKey, Object event) {
+        if (rabbitTemplate == null) {
+            log.warn("RabbitTemplate not available, skipping event publishing");
+            return;
+        }
+
+        try {
+            rabbitTemplate.convertAndSend(exchange, routingKey, event);
+            log.info("Published event: {} to exchange: {} with routing key: {}", event.getClass().getSimpleName(), exchange, routingKey);
+        } catch (Exception e) {
+            log.error("Failed to publish event", e);
+        }
+    }
     
     private java.util.Set<UUID> getProjectCollaborators(UUID projectId) {
         try {

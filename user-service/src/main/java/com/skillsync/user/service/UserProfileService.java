@@ -25,8 +25,8 @@ public class UserProfileService {
     private final UserProfileMapper mapper;
 
     public UserProfileService(UserProfileRepository userProfileRepository,
-                              SkillCardRepository skillCardRepository,
-                              UserProfileMapper mapper) {
+            SkillCardRepository skillCardRepository,
+            UserProfileMapper mapper) {
         this.userProfileRepository = userProfileRepository;
         this.skillCardRepository = skillCardRepository;
         this.mapper = mapper;
@@ -36,7 +36,7 @@ public class UserProfileService {
         if (userProfileRepository.existsByUserId(request.getUserId())) {
             throw new DuplicateResourceException("Profile already exists for user: " + request.getUserId());
         }
-        
+
         if (userProfileRepository.existsByUsername(request.getUsername())) {
             throw new DuplicateResourceException("Username already taken: " + request.getUsername());
         }
@@ -53,6 +53,29 @@ public class UserProfileService {
 
         UserProfile saved = userProfileRepository.save(profile);
         return mapper.toDto(saved);
+    }
+
+    public void createDefaultProfile(UUID userId) {
+        if (userProfileRepository.existsByUserId(userId)) {
+            return;
+        }
+
+        UserProfile profile = new UserProfile();
+        profile.setUserId(userId);
+        // Set default username as user-{uuid-prefix}
+        String defaultUsername = "user-" + userId.toString().substring(0, 8);
+        // Ensure uniqueness in case of collision (unlikely with UUID prefix but
+        // possible if user changes it back)
+        int counter = 1;
+        while (userProfileRepository.existsByUsername(defaultUsername)) {
+            defaultUsername = "user-" + userId.toString().substring(0, 8) + "-" + counter++;
+        }
+
+        profile.setUsername(defaultUsername);
+        profile.setDisplayName("New User");
+        profile.setVisibility(com.skillsync.user.entity.Visibility.PUBLIC); // Public by default
+
+        userProfileRepository.save(profile);
     }
 
     @Transactional(readOnly = true)
@@ -81,8 +104,8 @@ public class UserProfileService {
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found: " + profileId));
 
         if (request.getUsername() != null) {
-            if (userProfileRepository.existsByUsername(request.getUsername()) && 
-                !request.getUsername().equals(profile.getUsername())) {
+            if (userProfileRepository.existsByUsername(request.getUsername()) &&
+                    !request.getUsername().equals(profile.getUsername())) {
                 throw new DuplicateResourceException("Username already taken: " + request.getUsername());
             }
             profile.setUsername(request.getUsername());

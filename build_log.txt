@@ -1,0 +1,238 @@
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for com.skillsync:project-service:jar:1.0.0-SNAPSHOT
+[WARNING] 'build.plugins.plugin.version' for org.apache.maven.plugins:maven-compiler-plugin is missing. @ line 63, column 21
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for com.skillsync:collaboration-service:jar:1.0.0-SNAPSHOT
+[WARNING] 'build.plugins.plugin.version' for org.apache.maven.plugins:maven-compiler-plugin is missing. @ line 58, column 21
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for com.skillsync:feedback-service:jar:1.0.0-SNAPSHOT
+[WARNING] 'build.plugins.plugin.version' for org.apache.maven.plugins:maven-compiler-plugin is missing. @ line 58, column 21
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for com.skillsync:notification-service:jar:1.0.0-SNAPSHOT
+[WARNING] 'build.plugins.plugin.version' for org.apache.maven.plugins:maven-compiler-plugin is missing. @ line 73, column 21
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] SkillSync Platform                                                 [pom]
+[INFO] Shared Libraries                                                   [jar]
+[INFO] API Gateway                                                        [jar]
+[INFO] Auth Service                                                       [jar]
+[INFO] User Service                                                       [jar]
+[INFO] Project Service                                                    [jar]
+[INFO] GitHub Sync Service                                                [jar]
+[INFO] Collaboration Service                                              [jar]
+[INFO] Feedback Service                                                   [jar]
+[INFO] Notification Service                                               [jar]
+[INFO] 
+[INFO] ------------------< com.skillsync:skillsync-platform >------------------
+[INFO] Building SkillSync Platform 1.0.0-SNAPSHOT                        [1/10]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ skillsync-platform ---
+[INFO] 
+[INFO] --- install:3.1.2:install (default-install) @ skillsync-platform ---
+[INFO] Installing D:\SkillSync\pom.xml to C:\Users\vinay kumar\.m2\repository\com\skillsync\skillsync-platform\1.0.0-SNAPSHOT\skillsync-platform-1.0.0-SNAPSHOT.pom
+[INFO] 
+[INFO] -------------------< com.skillsync:shared-libraries >-------------------
+[INFO] Building Shared Libraries 1.0.0-SNAPSHOT                          [2/10]
+[INFO]   from shared-libraries\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ shared-libraries ---
+[INFO] Deleting D:\SkillSync\shared-libraries\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ shared-libraries ---
+[INFO] skip non existing resourceDirectory D:\SkillSync\shared-libraries\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ shared-libraries ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 13 source files with javac [debug target 17] to target\classes
+[WARNING] system modules path not set in conjunction with -source 17
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ shared-libraries ---
+[INFO] skip non existing resourceDirectory D:\SkillSync\shared-libraries\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ shared-libraries ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.2.5:test (default-test) @ shared-libraries ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ shared-libraries ---
+[INFO] Building jar: D:\SkillSync\shared-libraries\target\shared-libraries-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- install:3.1.2:install (default-install) @ shared-libraries ---
+[INFO] Installing D:\SkillSync\shared-libraries\pom.xml to C:\Users\vinay kumar\.m2\repository\com\skillsync\shared-libraries\1.0.0-SNAPSHOT\shared-libraries-1.0.0-SNAPSHOT.pom
+[INFO] Installing D:\SkillSync\shared-libraries\target\shared-libraries-1.0.0-SNAPSHOT.jar to C:\Users\vinay kumar\.m2\repository\com\skillsync\shared-libraries\1.0.0-SNAPSHOT\shared-libraries-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ---------------------< com.skillsync:api-gateway >----------------------
+[INFO] Building API Gateway 1.0.0-SNAPSHOT                               [3/10]
+[INFO]   from api-gateway\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ api-gateway ---
+[INFO] Deleting D:\SkillSync\api-gateway\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ api-gateway ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ api-gateway ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 10 source files with javac [debug target 17] to target\classes
+[WARNING] system modules path not set in conjunction with -source 17
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ api-gateway ---
+[INFO] skip non existing resourceDirectory D:\SkillSync\api-gateway\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ api-gateway ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.2.5:test (default-test) @ api-gateway ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ api-gateway ---
+[INFO] Building jar: D:\SkillSync\api-gateway\target\api-gateway-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- install:3.1.2:install (default-install) @ api-gateway ---
+[INFO] Installing D:\SkillSync\api-gateway\pom.xml to C:\Users\vinay kumar\.m2\repository\com\skillsync\api-gateway\1.0.0-SNAPSHOT\api-gateway-1.0.0-SNAPSHOT.pom
+[INFO] Installing D:\SkillSync\api-gateway\target\api-gateway-1.0.0-SNAPSHOT.jar to C:\Users\vinay kumar\.m2\repository\com\skillsync\api-gateway\1.0.0-SNAPSHOT\api-gateway-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ---------------------< com.skillsync:auth-service >---------------------
+[INFO] Building Auth Service 1.0.0-SNAPSHOT                              [4/10]
+[INFO]   from auth-service\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ auth-service ---
+[INFO] Deleting D:\SkillSync\auth-service\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ auth-service ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ auth-service ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 21 source files with javac [debug target 17] to target\classes
+[WARNING] system modules path not set in conjunction with -source 17
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ auth-service ---
+[INFO] skip non existing resourceDirectory D:\SkillSync\auth-service\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ auth-service ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.2.5:test (default-test) @ auth-service ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ auth-service ---
+[INFO] Building jar: D:\SkillSync\auth-service\target\auth-service-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- install:3.1.2:install (default-install) @ auth-service ---
+[INFO] Installing D:\SkillSync\auth-service\pom.xml to C:\Users\vinay kumar\.m2\repository\com\skillsync\auth-service\1.0.0-SNAPSHOT\auth-service-1.0.0-SNAPSHOT.pom
+[INFO] Installing D:\SkillSync\auth-service\target\auth-service-1.0.0-SNAPSHOT.jar to C:\Users\vinay kumar\.m2\repository\com\skillsync\auth-service\1.0.0-SNAPSHOT\auth-service-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ---------------------< com.skillsync:user-service >---------------------
+[INFO] Building User Service 1.0.0-SNAPSHOT                              [5/10]
+[INFO]   from user-service\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ user-service ---
+[INFO] Deleting D:\SkillSync\user-service\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ user-service ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ user-service ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 28 source files with javac [debug target 17] to target\classes
+[WARNING] system modules path not set in conjunction with -source 17
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ user-service ---
+[INFO] skip non existing resourceDirectory D:\SkillSync\user-service\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ user-service ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.2.5:test (default-test) @ user-service ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ user-service ---
+[INFO] Building jar: D:\SkillSync\user-service\target\user-service-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- install:3.1.2:install (default-install) @ user-service ---
+[INFO] Installing D:\SkillSync\user-service\pom.xml to C:\Users\vinay kumar\.m2\repository\com\skillsync\user-service\1.0.0-SNAPSHOT\user-service-1.0.0-SNAPSHOT.pom
+[INFO] Installing D:\SkillSync\user-service\target\user-service-1.0.0-SNAPSHOT.jar to C:\Users\vinay kumar\.m2\repository\com\skillsync\user-service\1.0.0-SNAPSHOT\user-service-1.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] -------------------< com.skillsync:project-service >--------------------
+[INFO] Building Project Service 1.0.0-SNAPSHOT                           [6/10]
+[INFO]   from project-service\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ project-service ---
+[INFO] Deleting D:\SkillSync\project-service\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ project-service ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ project-service ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 30 source files with javac [debug parameters target 17] to target\classes
+[INFO] Annotation processing is enabled because one or more processors were found
+  on the class path. A future release of javac may disable annotation processing
+  unless at least one processor is specified by name (-processor), or a search
+  path is specified (--processor-path, --processor-module-path), or annotation
+  processing is enabled explicitly (-proc:only, -proc:full).
+  Use -Xlint:-options to suppress this message.
+  Use -proc:none to disable annotation processing.
+[INFO] -------------------------------------------------------------
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] system modules path not set in conjunction with -source 17
+[INFO] 1 warning
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /D:/SkillSync/project-service/src/main/java/com/skillsync/project/ProjectServiceApplication.java:[5,48] package org.springframework.cloud.netflix.eureka does not exist
+[ERROR] /D:/SkillSync/project-service/src/main/java/com/skillsync/project/ProjectServiceApplication.java:[8,2] cannot find symbol
+  symbol: class EnableEurekaClient
+[INFO] 2 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for SkillSync Platform 1.0.0-SNAPSHOT:
+[INFO] 
+[INFO] SkillSync Platform ................................. SUCCESS [  0.318 s]
+[INFO] Shared Libraries ................................... SUCCESS [  3.020 s]
+[INFO] API Gateway ........................................ SUCCESS [  1.794 s]
+[INFO] Auth Service ....................................... SUCCESS [  1.610 s]
+[INFO] User Service ....................................... SUCCESS [  1.284 s]
+[INFO] Project Service .................................... FAILURE [  1.891 s]
+[INFO] GitHub Sync Service ................................ SKIPPED
+[INFO] Collaboration Service .............................. SKIPPED
+[INFO] Feedback Service ................................... SKIPPED
+[INFO] Notification Service ............................... SKIPPED
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  10.421 s
+[INFO] Finished at: 2025-11-20T09:40:47+05:30
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project project-service: Compilation failure: Compilation failure: 
+[ERROR] /D:/SkillSync/project-service/src/main/java/com/skillsync/project/ProjectServiceApplication.java:[5,48] package org.springframework.cloud.netflix.eureka does not exist
+[ERROR] /D:/SkillSync/project-service/src/main/java/com/skillsync/project/ProjectServiceApplication.java:[8,2] cannot find symbol
+[ERROR]   symbol: class EnableEurekaClient
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :project-service

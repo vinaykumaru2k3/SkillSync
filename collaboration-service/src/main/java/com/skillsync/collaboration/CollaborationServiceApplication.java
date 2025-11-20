@@ -7,7 +7,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
-@ComponentScan(basePackages = {"com.skillsync.collaboration", "com.skillsync.shared"})
+
+@ComponentScan(basePackages = { "com.skillsync.collaboration", "com.skillsync.shared" })
 public class CollaborationServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(CollaborationServiceApplication.class, args);

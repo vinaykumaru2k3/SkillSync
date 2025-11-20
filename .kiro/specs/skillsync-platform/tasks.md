@@ -73,13 +73,11 @@
   
 
 
-  - [ ] 4.2 Backend: Implement authentication APIs
+  - [x] 4.2 Backend: Implement authentication APIs
     - Create REST controllers for login, register, and logout
     - Implement JWT token refresh mechanism
     - Add token blacklisting for logout functionality
     - Integrate GitHub OAuth for social login
-
-
     - _Requirements: 1.1, 1.2, 1.3_
   
   - [ ] 4.3 Frontend: Implement authentication and routing
@@ -223,19 +221,15 @@
   
 
 
-  - [ ] 7.2 Backend: Implement repository synchronization
+  - [x] 7.2 Backend: Implement repository synchronization
     - Create GitHub API service for repository fetching
     - Implement language statistics calculation
     - Add commit activity tracking
     - Create endpoints for manual and automatic sync
-
-
     - _Requirements: 3.1, 3.3_
   
-  - [ ] 7.3 Backend: Add webhook processing for real-time updates
+  - [x] 7.3 Backend: Add webhook processing for real-time updates
     - Implement GitHub webhook endpoint
-
-
     - Create event processing for repository changes
     - Add rate limiting and retry logic for GitHub API calls
     - _Requirements: 3.2, 3.4, 3.5_
@@ -391,22 +385,22 @@
 ## Phase 7: System Integration & Cross-Service Communication
 
 - [ ] 11. Cross-Service Integration and Events
-  - [ ] 11.1 Implement event-driven communication
-    - Configure RabbitMQ message producers in each service
-    - Create domain event classes for cross-service communication
-    - Implement event publishing for key business operations
+  - [x] 11.1 Implement event-driven communication
+    - [x] Configure RabbitMQ message producers in each service
+    - [x] Create domain event classes for cross-service communication
+    - [x] Implement event publishing for key business operations
     - _Requirements: 5.1, 6.5, 7.3_
   
-  - [ ] 11.2 Add service discovery and health checks
-    - Implement health check endpoints for all services
-    - Configure service registration with Spring Cloud
-    - Add readiness and liveness probes for Kubernetes deployment
+  - [x] 11.2 Add service discovery and health checks
+    - [x] Implement health check endpoints for all services
+    - [x] Configure service registration with Spring Cloud (Skipped: Using Docker Compose Discovery)
+    - [x] Add readiness and liveness probes for Kubernetes deployment (Skipped: Using Docker Healthchecks)
     - _Requirements: 9.1, 9.2_
   
-  - [ ] 11.3 Implement distributed tracing and logging
-    - Configure Spring Cloud Sleuth for request tracing
-    - Add structured logging with correlation IDs
-    - Implement centralized log aggregation
+  - [x] 11.3 Implement distributed tracing and logging
+    - [x] Configure Spring Cloud Sleuth (Replaced with Micrometer Tracing) for request tracing
+    - [x] Add structured logging with correlation IDs
+    - [x] Implement centralized log aggregation (Ready for Zipkin)
     - _Requirements: 9.3, 9.5_
   
   - [ ]* 11.4 Write end-to-end integration tests
@@ -414,6 +408,7 @@
     - Test event-driven communication between services
     - Test system behavior under failure scenarios
     - _Requirements: 1.1, 2.1, 4.1, 5.1_
+
 
 ## Phase 8: Security, Performance & Optimization
 

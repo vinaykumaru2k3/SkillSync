@@ -1,5 +1,8 @@
 package com.skillsync.project.service;
 
+import com.skillsync.shared.events.TaskCreatedEvent;
+import com.skillsync.shared.events.TaskUpdatedEvent;
+import com.skillsync.project.config.RabbitMQConfig;
 import com.skillsync.project.client.UserServiceClient;
 import com.skillsync.project.dto.TaskMoveRequest;
 import com.skillsync.project.dto.TaskRequest;
@@ -48,6 +51,9 @@ public class TaskService {
         
         Task savedTask = taskRepository.save(task);
         log.info("Task created with ID: {}", savedTask.getId());
+
+        TaskCreatedEvent taskCreatedEvent = new TaskCreatedEvent(savedTask.getId().toString(), column.getProject().getId().toString(), savedTask.getTitle(), creatorId.toString());
+        eventPublisher.publishEvent(RabbitMQConfig.PROJECT_EXCHANGE, "task.created", taskCreatedEvent);
         
         if (savedTask.getAssigneeId() != null) {
             eventPublisher.publishTaskAssigned(savedTask, column.getProject());
@@ -99,6 +105,9 @@ public class TaskService {
         
         Task updatedTask = taskRepository.save(task);
         log.info("Task updated: {}", taskId);
+
+        TaskUpdatedEvent taskUpdatedEvent = new TaskUpdatedEvent(updatedTask.getId().toString(), task.getColumn().getProject().getId().toString(), updatedTask.getTitle(), userId.toString());
+        eventPublisher.publishEvent(RabbitMQConfig.PROJECT_EXCHANGE, "task.updated", taskUpdatedEvent);
         
         if (request.getAssigneeId() != null && !request.getAssigneeId().equals(oldAssigneeId)) {
             eventPublisher.publishTaskAssigned(updatedTask, task.getColumn().getProject());

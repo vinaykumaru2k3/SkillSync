@@ -7,6 +7,11 @@ spring:
   data:
     mongodb:
       uri: mongodb://skillsync:skillsync123@localhost:27017/skillsync?authSource=admin
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: skillsync
+    password: skillsync123
 
 github:
   api:
@@ -39,3 +44,8 @@ spring:
   data:
     mongodb:
       uri: mongodb://skillsync:skillsync123@mongodb:27017/skillsync?authSource=admin
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: skillsync
+    password: skillsync123

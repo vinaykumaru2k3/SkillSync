@@ -1,5 +1,7 @@
 package com.skillsync.feedback.service;
 
+import com.skillsync.shared.events.FeedbackSubmittedEvent;
+import com.skillsync.feedback.config.RabbitMQConfig;
 import com.skillsync.feedback.client.UserServiceClient;
 import com.skillsync.feedback.dto.FeedbackRequest;
 import com.skillsync.feedback.dto.FeedbackResponse;
@@ -61,10 +63,13 @@ public class FeedbackService {
 
         feedback = feedbackRepository.save(feedback);
         updateRatingAggregation(request.getProjectId(), request.getRating(), true);
-        
+
+        FeedbackSubmittedEvent feedbackSubmittedEvent = new FeedbackSubmittedEvent(feedback.getId(), request.getProjectId().toString(), authorId.toString());
+        eventPublisher.publishEvent(RabbitMQConfig.FEEDBACK_EXCHANGE, "feedback.submitted", feedbackSubmittedEvent);
+
         UserServiceClient.UserInfo authorInfo = userServiceClient.getUserInfo(authorId);
         com.skillsync.feedback.client.ProjectServiceClient.ProjectInfo projectInfo = projectServiceClient.getProjectInfo(request.getProjectId());
-        eventPublisher.publishFeedbackReceived(projectInfo.getOwnerId(), request.getProjectId(), projectInfo.getName(), authorInfo.getDisplayName(), request.getRating());
+        
         
         return mapToResponse(feedback, authorId);
     }

@@ -19,7 +19,7 @@ public class EventPublisher {
 
     public void publishFeedbackReceived(UUID projectOwnerId, UUID projectId, String projectName, String authorName, int rating) {
         if (rabbitTemplate == null) {
-            log.warn("RabbitTemplate not available, skipping notification");
+            log.warn("RabbitTemplate not available, skipping event publishing");
             return;
         }
 
@@ -38,6 +38,20 @@ public class EventPublisher {
             log.info("Published FEEDBACK_RECEIVED notification for user {}", projectOwnerId);
         } catch (Exception e) {
             log.error("Failed to publish notification event", e);
+        }
+    }
+
+    public void publishEvent(String exchange, String routingKey, Object event) {
+        if (rabbitTemplate == null) {
+            log.warn("RabbitTemplate not available, skipping event publishing");
+            return;
+        }
+
+        try {
+            rabbitTemplate.convertAndSend(exchange, routingKey, event);
+            log.info("Published event: {} to exchange: {} with routing key: {}", event.getClass().getSimpleName(), exchange, routingKey);
+        } catch (Exception e) {
+            log.error("Failed to publish event", e);
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.skillsync.project.service;
 
+import com.skillsync.shared.events.ProjectCreatedEvent;
+import com.skillsync.project.config.RabbitMQConfig;
 import com.skillsync.project.client.CollaborationServiceClient;
 import com.skillsync.project.dto.*;
 import com.skillsync.project.entity.BoardColumn;
@@ -48,6 +50,9 @@ public class ProjectService {
         
         Project savedProject = projectRepository.save(project);
         log.info("Project created with ID: {}", savedProject.getId());
+
+        ProjectCreatedEvent projectCreatedEvent = new ProjectCreatedEvent(savedProject.getId().toString(), savedProject.getName(), ownerId.toString());
+        eventPublisher.publishEvent(RabbitMQConfig.PROJECT_EXCHANGE, "project.created", projectCreatedEvent);
         
         return mapToProjectResponse(savedProject);
     }

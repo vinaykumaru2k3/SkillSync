@@ -1,10 +1,9 @@
-package com.skillsync.collaboration.config;
+package com.skillsync.github.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
@@ -13,27 +12,27 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    public static final String COLLABORATION_EXCHANGE = "collaboration.exchange";
-    public static final String COLLABORATION_QUEUE = "collaboration.queue";
-    public static final String COLLABORATION_ROUTING_KEY = "collaboration.#";
+    public static final String GITHUB_EXCHANGE = "github.exchange";
+    public static final String GITHUB_QUEUE = "github.queue";
+    public static final String GITHUB_ROUTING_KEY = "github.#";
 
     @Bean
-    public TopicExchange collaborationExchange() {
-        return new TopicExchange(COLLABORATION_EXCHANGE);
+    public TopicExchange githubExchange() {
+        return new TopicExchange(GITHUB_EXCHANGE);
     }
 
     @Bean
-    public Queue collaborationQueue() {
-        return QueueBuilder.durable(COLLABORATION_QUEUE)
-                .withArgument("x-dead-letter-exchange", "collaboration.dlx")
+    public Queue githubQueue() {
+        return QueueBuilder.durable(GITHUB_QUEUE)
+                .withArgument("x-dead-letter-exchange", "github.dlx")
                 .build();
     }
 
     @Bean
-    public Binding collaborationBinding(Queue collaborationQueue, TopicExchange collaborationExchange) {
-        return BindingBuilder.bind(collaborationQueue)
-                .to(collaborationExchange)
-                .with(COLLABORATION_ROUTING_KEY);
+    public Binding githubBinding(Queue githubQueue, TopicExchange githubExchange) {
+        return BindingBuilder.bind(githubQueue)
+                .to(githubExchange)
+                .with(GITHUB_ROUTING_KEY);
     }
 
     @Bean
@@ -53,12 +52,5 @@ public class RabbitMQConfig {
         factory.setConcurrentConsumers(3);
         factory.setMaxConcurrentConsumers(10);
         return factory;
-    }
-
-    @Bean
-    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, Jackson2JsonMessageConverter messageConverter) {
-        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        rabbitTemplate.setMessageConverter(messageConverter);
-        return rabbitTemplate;
     }
 }
