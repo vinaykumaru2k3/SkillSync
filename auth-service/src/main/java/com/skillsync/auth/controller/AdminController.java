@@ -61,7 +61,7 @@ public class AdminController {
                                 user.getId(),
                                 user.getEmail(),
                                 user.getRoles(),
-                                user.isActive()))
+                                user.getIsActive()))
                         .toList());
     }
 
