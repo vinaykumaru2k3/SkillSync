@@ -52,6 +52,19 @@ public class AdminController {
         return ResponseEntity.ok(new RoleResponse(user.getId(), user.getRoles()));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/users")
+    public ResponseEntity<?> getAllUsers() {
+        return ResponseEntity.ok(
+                userRepository.findAll().stream()
+                        .map(user -> new UserDto(
+                                user.getId(),
+                                user.getEmail(),
+                                user.getRoles(),
+                                user.isActive()))
+                        .toList());
+    }
+
     // DTOs
     public static class RoleRequest {
         private String role;
@@ -80,6 +93,36 @@ public class AdminController {
 
         public Set<String> getRoles() {
             return roles;
+        }
+    }
+
+    public static class UserDto {
+        private UUID id;
+        private String email;
+        private Set<String> roles;
+        private boolean active;
+
+        public UserDto(UUID id, String email, Set<String> roles, boolean active) {
+            this.id = id;
+            this.email = email;
+            this.roles = roles;
+            this.active = active;
+        }
+
+        public UUID getId() {
+            return id;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public Set<String> getRoles() {
+            return roles;
+        }
+
+        public boolean isActive() {
+            return active;
         }
     }
 }

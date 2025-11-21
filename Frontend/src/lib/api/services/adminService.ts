@@ -5,7 +5,19 @@ export interface UserRole {
     roles: string[]
 }
 
+export interface AdminUser {
+    id: string
+    email: string
+    roles: string[]
+    active: boolean
+}
+
 export const adminService = {
+    // Get all users
+    getAllUsers: async (): Promise<AdminUser[]> => {
+        return await apiClient.get('/auth/admin/users')
+    },
+
     // Get user roles
     getUserRoles: async (userId: string): Promise<UserRole> => {
         return await apiClient.get(`/auth/admin/users/${userId}/roles`)
