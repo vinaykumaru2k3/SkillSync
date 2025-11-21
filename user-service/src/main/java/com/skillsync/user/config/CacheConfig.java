@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
+// import org.springframework.cache.annotation.EnableCaching;  // Disabled temporarily
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -17,7 +17,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.time.Duration;
 
 @Configuration
-@EnableCaching
+// @EnableCaching // Temporarily disabled due to serialization issues - will fix
+// in Phase 10
 public class CacheConfig {
 
         @Bean
