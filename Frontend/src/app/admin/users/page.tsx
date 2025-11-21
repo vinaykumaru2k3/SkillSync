@@ -3,13 +3,14 @@
 import { useState } from 'react'
 import { Card } from '@/components/common/Card'
 import { Button } from '@/components/common/Button'
+import { adminService } from '@/lib/api/services/adminService'
 
 export default function UserManagementPage() {
     const [users, setUsers] = useState([
-        { id: '1', name: 'John Doe', email: 'john@example.com', role: 'User', status: 'Active' },
-        { id: '2', name: 'Jane Smith', email: 'jane@example.com', role: 'Admin', status: 'Active' },
-        { id: '3', name: 'Bob Wilson', email: 'bob@example.com', role: 'User', status: 'Suspended' },
-        { id: '4', name: 'Alice Brown', email: 'alice@example.com', role: 'User', status: 'Active' },
+        { id: '1', name: 'John Doe', email: 'john@example.com', role: 'User', status: 'Active', roles: ['ROLE_USER'] },
+        { id: '2', name: 'Jane Smith', email: 'jane@example.com', role: 'Admin', status: 'Active', roles: ['ROLE_USER', 'ROLE_ADMIN'] },
+        { id: '3', name: 'Bob Wilson', email: 'bob@example.com', role: 'User', status: 'Suspended', roles: ['ROLE_USER'] },
+        { id: '4', name: 'Alice Brown', email: 'alice@example.com', role: 'User', status: 'Active', roles: ['ROLE_USER'] },
     ])
 
     const toggleStatus = (userId: string) => {
@@ -19,6 +20,36 @@ export default function UserManagementPage() {
             }
             return user
         }))
+    }
+
+    const grantAdminRole = async (userId: string) => {
+        try {
+            await adminService.addRole(userId, 'ROLE_ADMIN')
+            setUsers(users.map(user => {
+                if (user.id === userId) {
+                    return { ...user, roles: [...user.roles, 'ROLE_ADMIN'], role: 'Admin' }
+                }
+                return user
+            }))
+        } catch (error) {
+            console.error('Failed to grant admin role:', error)
+            alert('Failed to grant admin role. Please try again.')
+        }
+    }
+
+    const revokeAdminRole = async (userId: string) => {
+        try {
+            await adminService.removeRole(userId, 'ROLE_ADMIN')
+            setUsers(users.map(user => {
+                if (user.id === userId) {
+                    return { ...user, roles: user.roles.filter(r => r !== 'ROLE_ADMIN'), role: 'User' }
+                }
+                return user
+            }))
+        } catch (error) {
+            console.error('Failed to revoke admin role:', error)
+            alert('Failed to revoke admin role. Please try again.')
+        }
     }
 
     return (
@@ -54,7 +85,22 @@ export default function UserManagementPage() {
                                             {user.status}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                        {user.roles.includes('ROLE_ADMIN') ? (
+                                            <button
+                                                onClick={() => revokeAdminRole(user.id)}
+                                                className="text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300"
+                                            >
+                                                Revoke Admin
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => grantAdminRole(user.id)}
+                                                className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                                            >
+                                                Grant Admin
+                                            </button>
+                                        )}
                                         <button
                                             onClick={() => toggleStatus(user.id)}
                                             className={`text-sm ${user.status === 'Active'
