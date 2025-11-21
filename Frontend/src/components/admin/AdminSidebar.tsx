@@ -20,13 +20,19 @@ export function AdminSidebar() {
                 <h2 className="text-xl font-bold text-gray-800 dark:text-white px-4">Admin Panel</h2>
             </div>
             <nav className="space-y-1">
+                <Link
+                    href="/dashboard"
+                    className="block px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white transition-colors border-b border-gray-200 dark:border-gray-700 mb-4"
+                >
+                    ← Back to Dashboard
+                </Link>
                 {links.map((link) => (
                     <Link
                         key={link.href}
                         href={link.href}
                         className={`block px-4 py-2 rounded-md text-sm font-medium transition-colors ${isActive(link.href)
-                                ? 'bg-blue-50 text-blue-700 dark:bg-gray-900 dark:text-blue-400'
-                                : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white'
+                            ? 'bg-blue-50 text-blue-700 dark:bg-gray-900 dark:text-blue-400'
+                            : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white'
                             }`}
                     >
                         {link.label}
