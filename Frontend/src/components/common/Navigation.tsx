@@ -86,6 +86,9 @@ export function Navigation() {
               <Link href="/search" className={getLinkClass('/search')}>
                 Discover
               </Link>
+              <Link href="/admin" className={getLinkClass('/admin')}>
+                Admin
+              </Link>
             </div>
           </div>
           <div className="flex items-center gap-3">
