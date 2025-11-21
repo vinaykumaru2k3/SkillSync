@@ -57,10 +57,10 @@ public class UserProfile {
     @Column(nullable = false)
     private Visibility visibility = Visibility.PUBLIC;
 
-    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<SkillCard> skills = new ArrayList<>();
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_social_links", joinColumns = @JoinColumn(name = "user_profile_id"))
     @MapKeyColumn(name = "platform")
     @Column(name = "url")

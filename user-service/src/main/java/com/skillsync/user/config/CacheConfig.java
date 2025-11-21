@@ -20,35 +20,36 @@ import java.time.Duration;
 @EnableCaching
 public class CacheConfig {
 
-    @Bean
-    public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        // Configure ObjectMapper for Redis serialization
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        objectMapper.activateDefaultTyping(
-                objectMapper.getPolymorphicTypeValidator(),
-                ObjectMapper.DefaultTyping.NON_FINAL);
+        @Bean
+        public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+                // Configure ObjectMapper for Redis serialization
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.registerModule(new JavaTimeModule());
+                objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+                objectMapper.activateDefaultTyping(
+                                objectMapper.getPolymorphicTypeValidator(),
+                                ObjectMapper.DefaultTyping.NON_FINAL);
 
-        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
+                GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
 
-        // Default cache configuration
-        RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(30))
-                .serializeKeysWith(
-                        RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(
-                        RedisSerializationContext.SerializationPair.fromSerializer(serializer))
-                .disableCachingNullValues();
+                // Default cache configuration
+                RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
+                                .entryTtl(Duration.ofMinutes(30))
+                                .serializeKeysWith(
+                                                RedisSerializationContext.SerializationPair
+                                                                .fromSerializer(new StringRedisSerializer()))
+                                .serializeValuesWith(
+                                                RedisSerializationContext.SerializationPair.fromSerializer(serializer))
+                                .disableCachingNullValues();
 
-        return RedisCacheManager.builder(connectionFactory)
-                .cacheDefaults(defaultConfig)
-                .withCacheConfiguration("userProfiles",
-                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(1)))
-                .withCacheConfiguration("skillCards",
-                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(2)))
-                .withCacheConfiguration("searchResults",
-                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(15)))
-                .build();
-    }
+                return RedisCacheManager.builder(connectionFactory)
+                                .cacheDefaults(defaultConfig)
+                                .withCacheConfiguration("userProfiles",
+                                                defaultConfig.entryTtl(Duration.ofHours(1)))
+                                .withCacheConfiguration("skillCards",
+                                                defaultConfig.entryTtl(Duration.ofHours(2)))
+                                .withCacheConfiguration("searchResults",
+                                                defaultConfig.entryTtl(Duration.ofMinutes(15)))
+                                .build();
+        }
 }
